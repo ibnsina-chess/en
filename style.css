@@ -42,6 +42,7 @@ nav img {
 }
 
 ul {
+    z-index:1;
     display: flex;
     list-style: none;
     gap: 30px;
@@ -62,6 +63,15 @@ li {
 li:hover {
     color: white;
     background: black;
+}
+
+a{
+    text-decoration: none;
+    color: black;
+}
+
+li:hover a {
+    color: white;
 }
 
 .main {
@@ -121,6 +131,9 @@ footer {
     li {
         color: white;
         font-size: 18px;
+    }
+    a{
+        color: white;
     }
 
     .menu-toggle {

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dark Knights Ibn Sina - Chess Club</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <!--
+             <li>Admins</li>
+            <li>About</li>
+            <li>Rules</li>
+            <li>Gallery</li>
+            -->
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </nav>
+
+    <main>
+        <img class="card" id="card" src="https://i.ibb.co/yP7ngDz/empty-membership-card.png" alt="">
+    </main>
+
+  
+
+    <style>
+.main{
+         
+    height: 100vw;
+
+}
+        .card{
+            margin: 100px auto;
+           filter: drop-shadow(1px 1px 20px green);
+            border: solid 5px white;
+           transition: .3s ;
+           z-index: 1000;
+
+            
+        }
+
+        .card:hover{
+           filter: drop-shadow(1px 1px 40px green);
+           transition: .3s ;
+            
+        }
+        @media (max-width: 768px) {
+            .card{
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+    </style>
+
+    
+    <script>
+        const card = document.getElementById("card");
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        console.log(id);
+        function toggleMenu() {
+            const navLinks = document.querySelector("nav ul");
+            navLinks.classList.toggle("show");
+        }
+        
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCd9XbhKz-AYvVJtLCi2hVDBvyYsSGB89w",
+    authDomain: "chess-3596b.firebaseapp.com",
+    databaseURL: "https://chess-3596b-default-rtdb.firebaseio.com",
+    projectId: "chess-3596b",
+    storageBucket: "chess-3596b.firebasestorage.app",
+    messagingSenderId: "628293480183",
+    appId: "1:628293480183:web:ecd5f317c728cd1233edf2",
+    measurementId: "G-11H7GE4LT7"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  const memberRef = database.ref('members/' + id);
+
+  memberRef.once('value', (snapshot) => {
+    const data = snapshot.val(); 
+    console.log(data);
+    if(data){
+    card.src = data.membership
+    if(data.Statue === 'good'){
+        card.style.filter = 'drop-shadow(1px 1px 20px green)';
+    }
+    else{
+        card.style.filter = 'drop-shadow(1px 1px 20px red)';
+    }
+    }
+    else{
+        card.src = "https://i.ibb.co/VxMz0HQ/no-member-found.png"
+        card.style.filter = 'drop-shadow(1px 1px 20px red)';
+    }
+
+})
+
+    </script>
+
+
+
+</body>
+</html>
