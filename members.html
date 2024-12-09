@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dark Knights Ibn Sina - Chess Club</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+          
+            
+        </ul>
+    </nav>
+
+    <div class="members-div">
+
+        <div id="members-list">
+            <div class="flex-div">
+                <h3>members </h3>
+                <button id="add"><i class="fas fa-plus"></i></button>                
+            </div>
+         
+
+        </ul>
+
+    </div>
+
+
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector("nav ul");
+            navLinks.classList.toggle("show");
+        }
+
+        const add = document.getElementById('add');
+        add.addEventListener('click', () => {
+            window.location.href = "addMember.html";
+
+        });
+    </script>
+<style> 
+
+    #members-list{
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: center;
+        width: 90vw;
+        border-radius: 20px;
+        border: solid 1px black;
+        padding: 20px;
+    }
+
+    #members-list h3{
+        font-size: 40px;
+    }
+    #members-list label{
+        width: 90%;
+        padding: 10px;
+
+        transition: .3s ;
+        
+    }
+    #members-list label:hover{
+        background-color: black;
+        color: white;
+        border: solid 1px black;
+        transition: .3s ;
+    }
+
+
+
+
+    .flex-div{
+        display: flex;
+        justify-content: space-between;
+        padding: 5px;
+        width: 100%;
+    }
+
+    #add{
+        border: solid 1px black;
+        
+        border-radius: 10px;
+        background-color: white;
+        transition: .3s ;
+        padding: 10px;
+        height: max-content;
+        font-size: 19px;
+        
+    
+    }
+    #add:hover{
+        background-color: black;
+        color: white;
+        transition: .3s ;
+    }
+</style>
+
+
+<script>
+
+
+const membersListDiv = document.getElementById("members-list");
+
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyCd9XbhKz-AYvVJtLCi2hVDBvyYsSGB89w",
+    authDomain: "chess-3596b.firebaseapp.com",
+    databaseURL: "https://chess-3596b-default-rtdb.firebaseio.com",
+    projectId: "chess-3596b",
+    storageBucket: "chess-3596b.firebasestorage.app",
+    messagingSenderId: "628293480183",
+    appId: "1:628293480183:web:ecd5f317c728cd1233edf2",
+    measurementId: "G-11H7GE4LT7"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// Reference to the "members" database
+const memberRef = database.ref('members/');
+
+// Fetch members from Firebase
+memberRef.once('value', (snapshot) => {
+    const data = snapshot.val(); 
+    console.log(data);
+
+    // Dynamically create labels for each member
+    for(const member in data) {
+        const label = document.createElement("label");
+        label.textContent = member;
+        label.className = "clickable-label"; // Add a class for identification
+        
+        // Add a click event listener immediately after creation
+        label.addEventListener('click', () => {
+            window.location.href = "member.html?id=" + label.textContent;
+       
+            //     console.log(`Label clicked: ${label.textContent}`);
+        });
+
+        membersListDiv.appendChild(label);
+    }
+});
+
+
+</script>
+</body>
+</html>
