@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification - The Dark Knights Ibn Sina</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+
+    <link rel="shortcut icon" href="https://i.ibb.co/1nxPTWV/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #000;
+            background-color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 2px solid #000;
+            
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #000;
+        }
+        th {
+            background-color: #000;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #fff;
+        }
+        tr:hover {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        #tablesContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .F {
+      color: gold; /* Gold color for first place */
+      font-size: 20px;
+    }
+    .S {
+      color: silver; /* Silver color for second place */
+      font-size: 17px;
+    }
+    .T {
+      color: #cd7f32; /* Bronze color for third place */
+      font-size: 16px;
+    }
+
+    /* Styling for the r, g, and n classes */
+.r {
+    color: red;
+}
+
+.g {
+    color: green;
+}
+
+.n {
+    color: gray;
+}
+
+/* Styling for the font-awesome icons */
+.fa-caret-up {
+    color: green;
+}
+
+.fa-caret-down {
+    color: red;
+}
+
+    @media (max-width: 768px) {
+      
+        
+
+
+    }
+    </style>
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="members.html">Members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+        </ul>
+    </nav>
+    <h1 >Evolution OF the Members</h1>
+    <h3 id="lastUpdate" style="text-align: center;"></h3>
+    <p class="loading">Loading data...</p>
+    <div id="tablesContainer"></div>
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector("nav ul");
+            navLinks.classList.toggle("show");
+        }
+    </script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCd9XbhKz-AYvVJtLCi2hVDBvyYsSGB89w",
+    authDomain: "chess-3596b.firebaseapp.com",
+    databaseURL: "https://chess-3596b-default-rtdb.firebaseio.com",
+    projectId: "chess-3596b",
+    storageBucket: "chess-3596b.appspot.com",
+    messagingSenderId: "628293480183",
+    appId: "1:628293480183:web:ecd5f317c728cd1233edf2",
+    measurementId: "G-11H7GE4LT7"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+const memberRef = ref(database, 'members/');
+const tablesContainer = document.getElementById('tablesContainer');
+const loadingText = document.querySelector('.loading');
+
+const chessCategories = [
+    { id: "chess_daily", title: "Chess Daily Rating" },
+    { id: "chess_rapid", title: "Chess Rapid Rating" },
+    { id: "chess_bullet", title: "Chess Bullet Rating" },
+    { id: "chess_blitz", title: "Chess Blitz Rating" },
+    { id: "tactics", title: "Tactics Highest Rating" }
+];
+
+// Retrieve saved ratings and last visit timestamp from localStorage
+const savedRatings = JSON.parse(localStorage.getItem('playerRatings')) || {};
+const lastVisit = localStorage.getItem('lastVisit');
+
+// Log last visit information
+if (lastVisit) {
+    document.getElementById('lastUpdate').textContent = `The evolution is between your past visit ${lastVisit} and now ${new Date().toLocaleString()}`;
+} else {
+    console.log("This is your first visit!");
+    document.getElementById('lastUpdate').textContent = `This is your first visit. From now on, you will be able to see the evolution of members during your future visits`;
+
+}
+
+// Update the last visit timestamp
+localStorage.setItem('lastVisit', new Date().toLocaleString());
+
+// Save updated ratings to localStorage
+const saveRatingsToLocalStorage = (ratings) => {
+    localStorage.setItem('playerRatings', JSON.stringify(ratings));
+};
+
+onValue(memberRef, async (snapshot) => {
+    const members = snapshot.val();
+    const memberKeys = Object.keys(members);
+    const categoryDataMap = {};
+    const newRatings = {};
+
+    chessCategories.forEach(category => {
+        categoryDataMap[category.id] = [];
+        const table = document.createElement('table');
+        table.id = `${category.id}Table`;
+        table.style.display = "none";
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>${category.title}</th>
+                    <th>Evolution</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        tablesContainer.appendChild(table);
+    });
+
+    for (const key of memberKeys) {
+        const memberRef = ref(database, `members/${key}`);
+        await new Promise((resolve) => {
+            onValue(memberRef, async (snapshot) => {
+                const memberData = snapshot.val();
+                const username = memberData.username;
+
+                if (username && username !== "none") {
+                    try {
+                        const response = await fetch(`https://api.chess.com/pub/player/${username}/stats`);
+                        if (response.ok) {
+                            const data = await response.json();
+
+                            chessCategories.forEach(category => {
+                                const categoryData = data[category.id]?.last || data[category.id]?.highest || null;
+                                if (categoryData) {
+                                    const currentRating = categoryData.rating || 0;
+                                    const playerName = memberData.name;
+
+                                    // Get saved rating and calculate evolution
+                                    const savedRating = savedRatings[playerName]?.[category.id] || 0;
+                                    const evolution = currentRating - savedRating;
+
+                                    // Store current rating in the new ratings object
+                                    if (!newRatings[playerName]) newRatings[playerName] = {};
+                                    newRatings[playerName][category.id] = currentRating;
+
+                                    categoryDataMap[category.id].push({
+                                        name: playerName,
+                                        rating: currentRating,
+                                        evolution: evolution
+                                    });
+                                }
+                            });
+                        } else {
+                            console.warn(`Chess.com API response not OK for username: ${username}`);
+                        }
+                    } catch (error) {
+                        console.error(`Failed to fetch stats for username: ${username}`, error);
+                    }
+                }
+                resolve();
+            }, { onlyOnce: true });
+        });
+    }
+
+    // Save updated ratings to localStorage
+    saveRatingsToLocalStorage(newRatings);
+
+    // Sort and display each category
+    chessCategories.forEach(category => {
+        const data = categoryDataMap[category.id];
+        if (data.length > 0) {
+            data.sort((a, b) => b.rating - a.rating); // Sort by descending rating
+            const table = document.getElementById(`${category.id}Table`);
+            const tbody = table.querySelector('tbody');
+
+            data.forEach((player, index) => {
+                const rank = index + 1;
+                const rankLabel = rank === 1 ? "1st" : rank === 2 ? "2nd" : rank === 3 ? "3rd" : `${rank}th`;
+                const evolutionSign = player.evolution > 0 ? "+" : "";
+                const evolutionText = `${evolutionSign}${player.evolution}`;
+
+                const row = document.createElement('tr');
+                if (rank === 1) {
+    if (evolutionText.indexOf('-') !== -1) {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal F"></i>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-down"></i></td>
+            <td class="r">${evolutionText}</td>`;
+    } else if (evolutionText === "0") {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal F"></i>${player.name}</td>
+            <td>${player.rating}</i></td>
+            <td class="n">${evolutionText}</td>`;
+    } else {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal F"></i>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-up"></i></td>
+            <td class="g">${evolutionText}</td>`;
+    }
+} else if (rank === 2) {
+    if (evolutionText.indexOf('-') !== -1) {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal S"></i>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-down"></i></td>
+            <td class="r">${evolutionText}</td>`;
+    } else if (evolutionText === "0") {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal S"></i>${player.name}</td>
+            <td>${player.rating}</i></td>
+            <td class="n">${evolutionText}</td>`;
+    } else {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal S"></i>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-up"></i></td>
+            <td class="g">${evolutionText}</td>`;
+    }
+} else if (rank === 3) {
+    if (evolutionText.indexOf('-') !== -1) {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal T"></i>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-down"></i></td>
+            <td class="r">${evolutionText}</td>`;
+    } else if (evolutionText === "0") {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal T"></i>${player.name}</td>
+            <td>${player.rating}</i></td>
+            <td class="n">${evolutionText}</td>`;
+    } else {
+        row.innerHTML = `
+            <td><i class="fas fa-medal golden-medal T"></i>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-up"></i></td>
+            <td class="g">${evolutionText}</td>`;
+    }
+} else {
+    if (evolutionText.indexOf('-') !== -1) {
+        row.innerHTML = `
+            <td>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-down"></i></td>
+            <td class="r">${evolutionText}</td>`;
+    } else if (evolutionText === "0") {
+        row.innerHTML = `
+            <td>${player.name}</td>
+            <td>${player.rating}</i></td>
+            <td class="n">${evolutionText}</td>`;
+    } else {
+        row.innerHTML = `
+            <td>${player.name}</td>
+            <td>${player.rating}<i class="fa fa-caret-up"></i></td>
+            <td class="g">${evolutionText}</td>`;
+    }
+}
+
+                
+                tbody.appendChild(row);
+            });
+
+            table.style.display = "table";
+        }
+    });
+
+    // Hide loading text
+    loadingText.style.display = "none";
+});
+
+
+</script>
+</body>
+</html>
