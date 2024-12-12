@@ -159,10 +159,12 @@
     });
     
     onValue(memberRef, async (snapshot) => {
+        
+       document.getElementById('tablesContainer').innerHTML = ""
         const members = snapshot.val();
         const memberKeys = Object.keys(members);
         const categoryDataMap = {};
-    
+        
         chessCategories.forEach(category => {
             categoryDataMap[category.id] = [];
             const table = document.createElement('table');
@@ -216,6 +218,7 @@
         }
     
         // Sort and display each category
+          
         chessCategories.forEach(category => {
             const data = categoryDataMap[category.id];
             const previousRankings = JSON.parse(localStorage.getItem(`${category.id}_rankings`) || '[]');
@@ -289,7 +292,8 @@
 
                     tbody.appendChild(row);
                 });
-    
+
+                
                 table.style.display = "table";
             }
         });
