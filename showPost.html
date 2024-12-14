@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>blog  - ibnsina chess</title>
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="loader.css">
+   <link rel="stylesheet" href="style.css">
+   
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="blog.html">blog</a></li>
+    
+        </ul>
+    </nav>
+
+
+    <div class="loader-section">
+        <div class="loader" id="loader"></div>
+    </div>
+
+    <div class="container" id="container">
+        <img src="#" alt="" id="img-cover">
+        <h1 id="title"></h1>
+        
+    <div class="reacts">
+        <i class="fas fa-share-alt" id="shareButton"></i>
+        <i class="fas fa-thumbs-up" id="likeBtn"></i>
+        <i class="fas fa-comments" id="commentsBtn"> 0 </i>
+
+          
+    </div>
+
+
+        <div id="contant">
+           
+        </div>
+
+        <div class="info">
+            <p id="by"></p>
+            <p id="time"></p>
+        </div>
+    </div>
+
+  
+    <style>
+        
+
+.reacts{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+        .container {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            width: 65vw; /* 65% of viewport width */
+            gap: 20px;
+        }
+        .info {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+        }
+        #by, #time {
+            color: white;
+            background: #000;
+            padding: 5px;
+            
+        }
+        img {
+            width: 65vw; /* 65% of viewport width */
+            height: auto; /* Maintain aspect ratio */
+            display: block; /* Remove any default inline spacing */
+            margin: 0 auto; 
+        }
+     
+#likeBtn , #commentsBtn{
+    border-radius: 10px;
+}
+h3{
+    color: red;
+}
+
+a{
+    background-color: black;
+}
+
+span{
+    color: red;
+}
+
+em{
+    color: gray;
+}
+
+i{
+    color: black;
+    border: solid 1px black;
+    padding: 10px;
+    border-radius: 100%;
+    transition: all .3s;
+    cursor: pointer;
+    margin: 0 4px;
+}
+
+
+i:hover{
+    color: white;
+    background: black ;
+    transition: all .3s;
+
+
+}
+
+
+        footer img {
+            width: 70px;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 90vw;
+            }
+            img {
+                width: 90vw;
+            }
+            footer {
+                padding: 0 78px;
+                width: 60vw;
+            
+            }
+
+
+        
+        }
+    </style>
+
+
+
+<script>
+    function toggleMenu() {
+        const navLinks = document.querySelector("nav ul");
+        navLinks.classList.toggle("show");
+    }
+</script>
+
+    <script>
+        const loader = document.getElementById('loader');
+    const container = document.getElementById('container');
+    const likeBtn = document.getElementById('likeBtn');
+    const commentsBtn = document.getElementById('commentsBtn');
+      const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+
+    if(localStorage.getItem(id) === 'liked'){
+        likeBtn.style.background = 'black'
+        likeBtn.style.color = 'white'
+        
+    }
+    else{
+        likeBtn.style.background = 'white'
+        likeBtn.style.color = 'black'
+    }
+
+      
+       
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOGC8qinBmX_F4msMrrxV3VgbwYt6mtg8",
+            authDomain: "darija2024-database.firebaseapp.com",
+            databaseURL: "https://darija2024-database-default-rtdb.firebaseio.com",
+            projectId: "darija2024-database",
+            storageBucket: "darija2024-database.appspot.com",
+            messagingSenderId: "621215461163",
+            appId: "1:621215461163:web:d594741683e99c742fdf6e",
+            measurementId: "G-VYFCV3GLZN"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Reference to the database
+        const dbRef = firebase.database().ref('posts/' + id);
+
+        dbRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const postData = data;
+                update(postData.imageUrl, postData.title, postData.text, postData.name, postData.timestamp , postData.likes , postData.comments);
+            }
+            else{
+                window.location.href = 'PageNotFound.html?id=' + id
+            }
+        });
+
+        function update(theImg, theTitle, theContent, theBy, theTime , likes , comments) {
+            // Get elements by their IDs
+            const imgCover = document.getElementById('img-cover');
+            const title = document.getElementById('title');
+            const content = document.getElementById('contant');
+            const by = document.getElementById('by');
+            const time = document.getElementById('time');
+
+            // Edit their values or properties
+            imgCover.src = theImg; // Update the image source
+            title.textContent = theTitle; // Update the title text
+            content.innerHTML  = theContent; // Update the content
+            by.textContent = `Author: ${theBy}`; // Update the author text
+            time.textContent = formatDate(theTime); // Update the time text
+            likeBtn.textContent = ' ' +  likes + ' '
+            commentsBtn.textContent = " " + Object.keys(comments).length + " "
+            loader.style.display = 'none'; 
+                
+        }
+
+        function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = String(date.getUTCFullYear()).slice(-2);
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+}
+
+
+document.getElementById('shareButton').addEventListener('click', () => {
+    if (navigator.share) {
+      navigator.share({
+        title: document.title,
+        text: document.getElementById('title').value,
+        url: window.location.href
+      }).then(() => {
+        console.log('Thanks for sharing!');
+      }).catch((error) => {
+        console.log('Error sharing:', error);
+      });
+    } else {
+      // Copy the URL to the clipboard
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => {
+          alert('Link copied to clipboard!');
+        })
+        .catch((error) => {
+          console.error('Error copying link:', error);
+          alert('Failed to copy link.');
+        });
+    }
+  });
+
+  
+likeBtn.addEventListener('click' , function(){
+  
+  if(localStorage.getItem(id) === 'liked'){
+      likeBtn.style.background = 'white'
+      likeBtn.style.color = 'black'
+      localStorage.setItem(id , 'unliked')
+      dbRef.update({
+    likes : Number(likeBtn.textContent)  - 1
+
+})
+
+  }
+  else{
+     likeBtn.style.background = 'black'
+      likeBtn.style.color = 'white'
+      localStorage.setItem(id , 'liked') 
+      dbRef.update({
+     likes : Number(likeBtn.textContent)  + 1
+})
+
+  }
+
+
+
+
+})
+
+
+
+commentsBtn.addEventListener('click' , function(){
+    
+
+    window.location.href = `comments.html?id=${id}`;
+
+})
+
+    </script>
+</body>
+</html>

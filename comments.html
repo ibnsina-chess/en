@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDAR.</title>
+    <title>blog  - ibnsina chess</title>
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<style>
+
+i{
+    color: black;
+    border: solid 1px black;
+    padding: 10px;
+    border-radius: 100%;
+    transition: all .3s;
+    cursor: pointer;
+    margin: 0 4px;
+}
+
+
+i:hover{
+    color: white;
+    background: black ;
+    transition: all .3s;
+
+
+}
+
+button{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+    cursor: pointer;
+    transition: all.3s;
+}
+
+button:hover{
+    background: white;
+    color: black;
+}
+</style>
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="blog.html">blog</a></li>
+    
+        </ul>
+    </nav>
+
+    <div id="postsDiv">
+     
+
+    </div>  
+
+   
+ 
+  <details>
+    <summary><i class="fa-solid fa-plus"></i>add new comment </summary>
+    <form id="addCommentDiv">
+      
+        <input type="text" id="usernameInput" placeholder="name" required>
+        <textarea  id="commentInput" placeholder="comment" required> </textarea>
+        <button type="submit">comment</button>
+    </form>
+  </details>
+    <h4>comments</h4>
+    <div id="commentsDiv">
+      
+
+    </div>
+    
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector("nav ul");
+            navLinks.classList.toggle("show");
+        }
+    </script>
+    <script>
+        
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+const commentsDiv = document.getElementById('commentsDiv');
+
+        
+const firebaseConfig = {
+    apiKey: "AIzaSyBOGC8qinBmX_F4msMrrxV3VgbwYt6mtg8",
+    authDomain: "darija2024-database.firebaseapp.com",
+    databaseURL: "https://darija2024-database-default-rtdb.firebaseio.com",
+    projectId: "darija2024-database",
+    storageBucket: "darija2024-database.appspot.com",
+    messagingSenderId: "621215461163",
+    appId: "1:621215461163:web:d594741683e99c742fdf6e",
+    measurementId: "G-VYFCV3GLZN"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+// Reference to the database
+const dbRef = firebase.database().ref('posts/' + id );
+        dbRef.orderByChild('timestamp').once('value', (snapshot) => {
+        const data = snapshot.val();
+        creatPost(data.imageUrl, data.title)
+        for(key of Object.keys(data.comments)){
+            console.log(key)
+            var commentData = data.comments[key]
+            
+            var username = commentData['username']
+            var comment = commentData['comment']
+            var time = commentData['timestamp']
+
+            creatComment(username , comment , time)
+        }
+
+
+
+/*
+    loader.style.display = 'none'; 
+    postsDiv.style.display = 'flex'; */
+
+});
+
+
+function getDate(){
+    var date = new Date().toISOString();
+    return "-" + date.substring(0 , 16).replace(/:/g, '-')
+    }
+
+
+    function makeId(title) {
+        var trimmedString = title.trim(); // Removes spaces from the beginning and end
+        var id = trimmedString.replace(/ /g, '-');
+        return id;
+    }
+
+
+document.getElementById("addCommentDiv").addEventListener("submit", function (e) {
+      e.preventDefault(); // Prevent form from submitting the default way
+
+      const theusername = document.getElementById("usernameInput").value;
+      const thecomment = document.getElementById("commentInput").value;
+      
+      
+      // Generate a new comment reference using a unique key
+      firebase.database().ref('posts/' + id + '/comments/' + makeId(theusername) + getDate() ).set(
+
+      {
+        username : theusername ,
+        comment : thecomment ,
+        timestamp: new Date().toISOString()
+      })
+      
+        .then(() => {
+           
+            // Optionally, clear the form after submission
+            document.getElementById("usernameInput").value = '';
+            document.getElementById("commentInput").value = '';
+          window.location.href = `comments.html?id=${id}`;
+
+        })
+        .catch((error) => {
+            console.error("Error storing comment: ", error);
+        });
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.getElementById('returnBtn').addEventListener(
+
+'click' , function(){
+    window.location.href = 'showPost.html?id=' + id
+}
+)
+
+
+
+function creatPost(imgSrc, textContent) {
+   
+
+    let postDiv = document.createElement('div');
+    postDiv.className = 'post';
+
+    let img = document.createElement('img');
+    img.src = imgSrc;
+    img.alt = '';
+
+    let p = document.createElement('h2');
+    p.textContent = textContent;
+
+
+    postDiv.appendChild(img);
+    postDiv.appendChild(p);
+   
+
+    postsDiv.appendChild(postDiv);
+}
+
+
+
+function creatComment(username , comment , time){
+    let commentDiv = document.createElement('div');
+        commentDiv.className = "commentDiv";
+
+        let usernameP = document.createElement('p');
+         usernameP.className = "username";
+         usernameP.textContent = username
+
+         let commentP = document.createElement('p');
+         commentP.className = "comment";
+         commentP.textContent = comment
+
+         let timeP = document.createElement('p')
+         timeP.className = "time";
+         timeP.textContent = formatDate(time)
+
+         commentDiv.appendChild(usernameP)
+         commentDiv.appendChild(commentP)
+         commentDiv.appendChild(timeP)
+     commentsDiv.appendChild(commentDiv)
+
+
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = String(date.getUTCFullYear()).slice(-2);
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+}
+    </script>
+
+
+
+<script>
+
+
+
+
+</script>
+
+
+<style>
+
+
+
+.post {
+    display: flex;
+    flex-direction: column;
+justify-content: center;
+align-items: center;
+border: solid 1px black;
+padding: 0px;
+border-radius: 20px;
+overflow: hidden;
+}
+
+.post h2{
+    text-align: center;
+    font-size: 20px;
+    margin:  10px 0;
+
+}
+.post img{
+    width: 250px;
+
+
+}
+
+h4{
+    color: gray;
+    padding: 10px;
+
+}
+
+#commentsDiv{
+   
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap-reverse;
+}
+
+.commentDiv{
+display: flex;
+flex-direction: column;
+align-items: start;
+border: solid 1px black;
+padding: 20px;
+border-radius: 20px;
+width: 80vw;
+margin:  5px 0;
+gap: 10px;
+
+}
+.username{
+ font-weight: 600;
+}
+
+.time{
+    color: black;
+    font-size: 14px;
+}
+
+#addCommentDiv{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    border: solid 1px black;
+    border-radius: 20px;
+    margin: 10px;
+    width: 80vw;
+    overflow: hidden;
+}
+
+#addCommentDiv input , textarea{
+    border: solid 1px black;
+    border-radius: 10px;
+
+    padding: 5px;
+
+}
+
+textarea{
+    height: 100px;
+}
+
+
+details {
+  position: relative;
+}
+
+details form {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;  /* Smooth transition */
+}
+
+details[open] form{
+  max-height: 500px;  /* Adjust this height to match your content size */
+}
+
+
+
+
+summary{
+    margin: 10px 0;
+    color: black;
+}
+
+@media only screen and (min-width: 600px){
+    .post{
+        padding: 0px;
+    }
+    .post img{
+    width: 500px;
+}
+
+    #addCommentDiv{
+        width: 500px;
+    }
+    .commentDiv{
+        width: 60vw;
+    }
+}
+</style>
+</body>

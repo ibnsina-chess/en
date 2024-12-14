@@ -225,6 +225,7 @@ onValue(memberRef, async (snapshot) => {
                                     });
                                 }
                             });
+                            var isDone = true;
                         } else {
                             console.warn(`Chess.com API response not OK for username: ${username}`);
                         }
@@ -336,6 +337,7 @@ onValue(memberRef, async (snapshot) => {
     // Hide loading text
     loadingText.style.display = "none";
 });
+
 
 
 </script>

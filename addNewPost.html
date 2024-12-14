@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>blog  - ibnsina chess</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="style.css">
+   <link rel="stylesheet" href="addNewPost.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+    
+.container{
+    width: 90%;
+    height: 100vh;
+}
+.container h1{
+   padding-top: 120px;
+   color: black;
+}
+
+
+form{
+display: flex;
+flex-direction: column;
+width: 90%;
+gap: 10px;
+
+
+}
+
+input{
+    padding: 5px;
+}
+
+textarea{
+    height: 50vh;
+    padding: 10px;
+
+}
+
+/* Add this to your CSS file */
+.progress-container {
+    margin-top: 20px;
+  
+}
+
+/* Style for the progress bar container */
+.progress-container {
+    margin-top: 20px ;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Style for the progress element */
+progress {
+    width: 100%;
+    height: 20px ;
+    -webkit-appearance: none; /* Remove default styles in WebKit browsers */
+}
+
+progress::-webkit-progress-bar {
+    background: #f3f3f3; /* Background color of the progress bar */
+}
+
+progress::-webkit-progress-value {
+    background: black; /* Color of the progress bar */
+}
+
+progress::-moz-progress-bar {
+    background: black; /* Color of the progress bar in Firefox */
+}
+
+#submit-button {
+    margin: 20px 0;
+}
+
+button{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+    cursor: pointer;
+    transition: all.3s;
+}
+
+button:hover{
+    background: white;
+    color: black;
+}
+
+
+
+
+@media only screen and (max-width: 600px) {
+ 
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width:95%;
+}
+
+}
+
+
+</style>
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="blog.html">blog</a></li>
+    
+        </ul>
+    </nav>
+<div class="progress-container">
+    <progress id="upload-progress" value="0" max="100"></progress>
+</div>
+<div class="container">
+    <h1>new article</h1>
+    <form id="post-form" action="/submit-post" method="post" enctype="multipart/form-data">
+        <label for="title">title</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="text">text</label>
+        <textarea id="text" name="text" rows="4"  cols="50" required></textarea>
+        
+
+        <label for="cover">cover : 534x299</label>
+        <input type="file" id="cover" name="cover" accept="image/*" required>
+
+        <label for="email">email :</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="name">name : </label>
+        <input type="text" id="name" name="name" required>
+        <button id="submit-button" type="submit">Submit Post</button>
+
+        
+    </form>
+</div>
+
+<script>
+    function toggleMenu() {
+        const navLinks = document.querySelector("nav ul");
+        navLinks.classList.toggle("show");
+    }
+</script>
+
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBOGC8qinBmX_F4msMrrxV3VgbwYt6mtg8",
+        authDomain: "darija2024-database.firebaseapp.com",
+        databaseURL: "https://darija2024-database-default-rtdb.firebaseio.com",
+        projectId: "darija2024-database",
+        storageBucket: "darija2024-database.appspot.com",
+        messagingSenderId: "621215461163",
+        appId: "1:621215461163:web:d594741683e99c742fdf6e",
+        measurementId: "G-VYFCV3GLZN"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const storage = firebase.storage(); // Initialize Firebase Storage
+
+    // Get form and progress elements
+    const form = document.getElementById('post-form');
+    const progressElement = document.getElementById('upload-progress');
+    const submitButton = document.getElementById('submit-button');
+
+    // Handle form submission
+    form.addEventListener('submit', (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        // Get form values
+        const title = document.getElementById('title').value;
+        const text = document.getElementById('text').value;
+        const email = document.getElementById('email').value;
+        const name = document.getElementById('name').value;
+        const coverFile = document.getElementById('cover').files[0];
+
+        if (coverFile) {
+            // Create a storage reference for the image
+            const storageRef = storage.ref('post_covers/' + coverFile.name);
+
+            // Upload the image to Firebase Storage
+            const uploadTask = storageRef.put(coverFile);
+
+            // Monitor upload progress
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Update progress bar
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    progressElement.value = progress;
+                    submitButton.disabled = true; // Disable button while uploading
+                }, 
+                (error) => {
+                    // Handle errors during upload
+                    console.error('Error uploading image:', error);
+                    submitButton.disabled = false; // Re-enable button on error
+                }, 
+                () => {
+                    // Get the download URL once the upload is complete
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Save the post data along with the image download URL
+                        savePostToDatabase(title, text, email, name, downloadURL);
+                    });
+                }
+            );
+        } else {
+            // If no image is uploaded, save the post without the image URL
+            savePostToDatabase(title, text, email, name, null);
+        }
+    });
+
+    function makeId(title) {
+        var trimmedString = title.trim(); // Removes spaces from the beginning and end
+        var id = trimmedString.replace(/ /g, '-');
+        return id;
+    }
+    function getDate(){
+    var date = new Date().toISOString();
+    return "-" + date.substring(0 , 16).replace(/:/g, '-')
+    }
+
+    // Function to save post data to Firebase Realtime Database
+    function savePostToDatabase(title, text, email, name, imageUrl) {
+        const postRef = database.ref('posts').push();
+        if(title.length > 34 ){
+       var theidTitle = title.substring(0 , 34)}
+       else{
+        var theidTitle = title}
+       
+
+        firebase.database().ref('posts/' + makeId(theidTitle) + getDate()).set({
+            title: title,
+            idTitle : theidTitle,
+            text: text.replace(/\n/g, '<br>'),
+            email: email,
+            name: name,
+            imageUrl: imageUrl || 'No image uploaded', // Save image URL or placeholder
+            timestamp: new Date().toISOString(),
+            likes: 0,
+            comments : "",
+            tag : "chess"
+        }).then(() => {
+            alert('Post saved successfully!');
+            form.reset(); // Clear the form
+            progressElement.value = 0; // Reset progress bar
+            submitButton.disabled = false; // Re-enable button
+            window.location.href = 'blog.html'; // Redirect to index.html
+        }).catch((error) => {
+            console.error('Error saving post:', error);
+            submitButton.disabled = false; // Re-enable button on error
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dark Knights Ibn Sina - Chess Club</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="loader.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+    <style>
+      .posts-div {
+    margin-top: 20px;
+    display: none;
+    flex-wrap: wrap-reverse;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+    flex: 1;
+}
+.post {
+    padding: 0px;
+    border: solid .2px #000000;
+    border-radius: 0px;
+    width: 250px;
+    transition: all .3s;
+    cursor: pointer;
+    overflow: hidden;
+}
+.post:hover {
+    padding: 0px;
+    border: solid 1px #000000;
+    transition: all .3s;
+    background: #000000;
+    border-radius: 00px;
+}
+.post img {
+    width: 250px;
+}
+.post p {
+    padding: 5px;
+    background-color: transparent;
+    font-weight: 600;
+}
+.post:hover p {
+    color: white;
+}
+.post:hover span {
+    color: white;
+}
+.post span {
+    color: #000000;
+    font-size: 10px;
+    font-weight: 600;
+    position: relative;
+    right: -3px;
+    top: -8px;
+}
+
+#add{
+        border: solid 1px black;
+        
+        border-radius: 10px;
+        background-color: white;
+        color: black;
+        transition: .3s ;
+        padding: 10px;
+        height: max-content;
+        font-size: 19px;
+        
+    
+    }
+    #add:hover{
+        background-color: black;
+        color: white;
+        transition: .3s ;
+    }
+
+@media only screen and (max-width: 768px) {
+    
+   
+    .post {
+       
+        width: 350px;
+    }
+    .post img {
+        width: 350px;
+    }
+    .post p {
+        font-size: 20px;
+    }
+   
+}
+
+        
+    </style>
+
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="blog.html">blog</a></li>
+    
+        </ul>
+    </nav>
+    <a href="addNewPost.html" id="add"><i class="fa-solid fa-plus"> add a new article</i></a>
+    <div class="loader-section">
+        <div class="loader" id="loader"></div>
+    </div>
+        <div class="posts-div" id="posts-div">
+            <!-- Posts will be dynamically added here -->
+        </div>
+    
+    
+
+  
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector("nav ul");
+            navLinks.classList.toggle("show");
+        }
+    </script>
+
+
+<script>
+
+    const postsDiv = document.getElementById('posts-div');
+    const loader = document.getElementById('loader');
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyBOGC8qinBmX_F4msMrrxV3VgbwYt6mtg8",
+        authDomain: "darija2024-database.firebaseapp.com",
+        databaseURL: "https://darija2024-database-default-rtdb.firebaseio.com",
+        projectId: "darija2024-database",
+        storageBucket: "darija2024-database.appspot.com",
+        messagingSenderId: "621215461163",
+        appId: "1:621215461163:web:d594741683e99c742fdf6e",
+        measurementId: "G-VYFCV3GLZN"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    
+    // Reference to the database
+    const dbRef = firebase.database().ref('posts');
+    
+    // Listen for real-time updates and order by timestamp
+    dbRef.orderByChild('timestamp').on('value', (snapshot) => {
+        postsDiv.innerHTML = ''; // Clear the current posts
+    
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            if(data.tag === "chess"){
+                          creatPost(data.imageUrl, data.idTitle, data.timestamp);
+  
+            }
+        });
+    
+        loader.style.display = 'none'; 
+        postsDiv.style.display = 'flex'; 
+    });
+    
+    function creatPost(imgSrc, textContent, date) {
+        if (textContent.length >= 34) {
+            textContent = textContent + '...';
+        }
+    
+        let postDiv = document.createElement('div');
+        postDiv.className = 'post';
+    
+        let img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = '';
+    
+        let p = document.createElement('p');
+        p.textContent = textContent;
+    
+        let ptime = document.createElement('span');
+        ptime.textContent = formatDate(date);
+    
+        postDiv.appendChild(img);
+        postDiv.appendChild(p);
+        postDiv.appendChild(ptime);
+    
+        postsDiv.appendChild(postDiv);
+    }
+    
+    document.getElementById('posts-div').addEventListener('click', function(event) {
+        const postDiv = event.target.closest('.post');
+    
+        if (postDiv) {
+            const titleElement = postDiv.querySelector('p');
+            const dateElement = postDiv.querySelector('span');
+            var titleText = titleElement.textContent || titleElement.innerText;
+    
+            if (titleText.length >= 34) {
+                titleText = titleText.slice(0, -3);
+            }
+    
+            window.location.href = `showPost.html?id=${makeId(titleText) + '-' + reformatDate(dateElement.textContent)}`;
+        }
+    });
+    
+    function makeId(title) {
+        var trimmedString = title.trim(); 
+        var id = trimmedString.replace(/ /g, '-');
+        return id;
+    }
+    
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const year = String(date.getUTCFullYear()).slice(-2);
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
+    }
+    
+    function reformatDate(inputString) {
+        const [datePart, timePart] = inputString.split(' ');
+        const [day, month, year] = datePart.split('-');
+        const [hours, minutes] = timePart.split(':');
+    
+        const fullYear = `20${year}`;
+    
+        return `${fullYear}-${month}-${day}T${hours}-${minutes}`;
+    }
+    
+    
+        </script>
+</body>
+</html>
