@@ -190,11 +190,16 @@ onValue(memberRef, async (snapshot) => {
         `;
         tablesContainer.appendChild(table);
     });
-
+    var counter = 1 ;
     for (const key of memberKeys) {
         const memberRef = ref(database, `members/${key}`);
+
         await new Promise((resolve) => {
             onValue(memberRef, async (snapshot) => {
+                var prog = counter / memberKeys.length * 100
+                    loadingText.innerHTML =  `Loading data...${prog.toFixed(2)}%`
+                    counter = counter + 1 ; 
+
                 const memberData = snapshot.val();
                 const username = memberData.username;
 

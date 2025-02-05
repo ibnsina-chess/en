@@ -72,19 +72,26 @@
 
 }
 
-.silver {
-   
-  
 
- 
+.link{
+    gap: 5px;
+    color: black;
+    border: solid 1px black;
+    border-radius: 20px;
+    background-color: white;
+    box-shadow: 10px 10px black;
+    padding: 15px;
+    margin-bottom: 20px;
+    transition: all .3s ease;
 
 }
 
-.bronze {
- 
+.link:hover {
+    color: white;
+    background-color: black;
+    box-shadow: none;
+    transition: all .3s ease;
 
-   
- 
 }
 
     </style>
@@ -106,6 +113,7 @@
         </ul>
     </nav>
     <h1 id="lastUpdate">Chess Classification</h1>
+    <a href="games.html" class="link">game played<i class="fa-solid fa-up-right-from-square"></i></a>
     <p class="loading">Loading data...</p>
     <div id="tablesContainer"></div>
 
@@ -182,11 +190,15 @@
             `;
             tablesContainer.appendChild(table);
         });
-    
+        var counter = 1 ;
         for (const key of memberKeys) {
             const memberRef = ref(database, `members/${key}`);
             await new Promise((resolve) => {
                 onValue(memberRef, async (snapshot) => {
+                    var prog = counter / memberKeys.length * 100
+                    loadingText.innerHTML =  `Loading data...${prog.toFixed(2)}%`
+                    counter = counter + 1 ; 
+
                     const memberData = snapshot.val();
                     const username = memberData.username;
     
@@ -199,8 +211,10 @@
                                 chessCategories.forEach(category => {
                                     const categoryData = data[category.id]?.last || data[category.id]?.highest || null;
                                     if (categoryData) {
+                                        
                                         categoryDataMap[category.id].push({
                                             name: memberData.name,
+                                            id : makeID(memberData.name , memberData.id),
                                             rating: categoryData.rating || 0
                                         });
                                     }
@@ -232,6 +246,7 @@
                 const tbody = table.querySelector('tbody');
     
                 data.forEach((player, index) => {
+                    
                     const rank = index + 1;
                     const rankLabel = rank === 1 ? "1st" : rank === 2 ? "2nd" : rank === 3 ? "3rd" : `${rank}th`;
                     let icon = '<i class="fa-solid fa-minus"></i>'; // Default: no change
@@ -254,36 +269,37 @@
 
                     if(rank === 1) {
                     row.innerHTML = `
-                    <td class='gold'>${rankLabel} ${icon}</td>
-                    <td class='gold'><i class="fas fa-medal golden-medal F"></i>${player.name}</td>
-                    <td class='gold'>${player.rating}</td>
+                    <td class='gold' id="${player.id}" >${rankLabel} ${icon}</td>
+                    <td class='gold' id="${player.id}" ><i class="fas fa-medal golden-medal F"></i>${player.name}</td>
+                    <td class='gold' id="${player.id}" >${player.rating}</td>
                 `;
                 }
                 else if(rank == 2){
                     row.innerHTML = `
-                    <td class='silver'>${rankLabel} ${icon}</td>
-                    <td class='silver'><i class="fas fa-medal golden-medal S"></i>${player.name}</td>
-                    <td class='silver'>${player.rating}</td>
+                    <td class='silver'id="${player.id}" >${rankLabel} ${icon}</td>
+                    <td class='silver'id="${player.id}" ><i class="fas fa-medal golden-medal S"></i>${player.name}</td>
+                    <td class='silver'id="${player.id}" >${player.rating}</td>
                 `;
 
                 }
 
                 else if(rank == 3){ 
                     row.innerHTML = `
-                    <td class='bronze'>${rankLabel} ${icon}</td>
-                    <td class='bronze'><i class="fas fa-medal golden-medal T"></i>${player.name}</td>
-                    <td class='bronze'>${player.rating}</td>
+                    <td class='bronze'id="${player.id}" >${rankLabel} ${icon}</td>
+                    <td class='bronze'id="${player.id}" ><i class="fas fa-medal golden-medal T"></i>${player.name}</td>
+                    <td class='bronze'id="${player.id}" >${player.rating}</td>
                 `;
 
 
                 }
                 else{
                     row.innerHTML = `
-                    <td>${rankLabel} ${icon}</td>
-                    <td>${player.name}</td>
-                    <td>${player.rating}</td>
+                    <td id="${player.id}" >${rankLabel} ${icon}</td>
+                    <td id="${player.id}" >${player.name}</td>
+                    <td id="${player.id}" >${player.rating}</td>
                 `;
                 }
+
 
 
 
@@ -308,6 +324,22 @@
     const formattedDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
     
     document.getElementById('lastUpdate').textContent = `Chess Classification (${formattedDate})`;
+
+    document.querySelector('body').addEventListener(
+        ('click'), function(target) {
+        
+            if(target.target.nodeName === "TD") {
+                window.location.href = `member.html?id=${target.target.id}`;
+            }
+        }
+    )
+
+    function makeID(name , idNumber){
+
+      return idNumber + "-" +  name.replace(/\s+/g, '-').toLowerCase();
+  
+      
+  }
     </script>
     
 </body>
