@@ -13,6 +13,7 @@ html {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    scrollbar-width: none;
 }
 
 body {
@@ -33,8 +34,9 @@ nav {
     padding: 20px;
     width: 100%;
     background: white;
+margin-top: 50px;
 
-    position: relative;
+  
 }
 
 nav img {
@@ -105,13 +107,67 @@ footer {
     margin-top: auto;
 }
 
+.footer-links {
+    display: flex;
+    
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+
+}
+
+.footer-links a {
+    font-family: "poppins", sans-serif;
+    font-weight: 200;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    text-decoration :underline;
+    transition: all 0.3s ease;
+    
+}
+.footer-links a:hover{
+    color: gray;
+    transition: all 0.3s ease;
+}
+
+footer i {
+    
+    transition: all 0.3s ease;
+    color: white;
+}
+footer i:hover {
+    background-color: white;
+    color: black;
+    padding: 5px;
+    transition: all 0.3s ease;
+    border-radius: 100px;
+    
+}
+
+.horizontal-div{
+    display: flex;
+    align-items: center;
+    justify-content: center ;
+
+}
+
+
+
+.vertical-div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Sidebar Styling for Mobile */
 @media (max-width: 768px) {
     nav {
         position: relative;
     }
 
-    ul {
+    nav ul {
         flex-direction: column;
         position: fixed;
         top: 0;
@@ -163,6 +219,21 @@ footer {
     .main{
         padding: 0px;
     }
+    
+
+    footer img{
+        width: 340px;
+    }
+    footer i {
+        font-size: 15px;
+    }
+    
+    
+    .footer-links a {
+        font-size: 15px;
+        
+    }
+    
     
 
  

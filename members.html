@@ -29,10 +29,10 @@
     </nav>
 
     <div class="members-div">
+        <h3 id="title">members</h3>
 
         <div id="members-list">
             <div class="flex-div">
-                <h3>members </h3>
                 <button id="add" style="display: none;"><i class="fas fa-plus"></i></button>                
             </div>
          
@@ -40,6 +40,25 @@
         </ul>
 
     </div>
+    <footer>
+        <div class="horizontal-div">
+             <img src="https://i.ibb.co/xr0mz7L/buil-by.png" alt="">
+            
+             <a href="https://github.com/abdelhakim-sahifa"> <i class="fa-brands fa-github"></i></a>
+        </div>
+ 
+ 
+           <ul class="footer-links">
+             <li><a href="members.html">members</a></li>
+             <li><a href="classification.html">Classification</a></li>
+             <li><a href="evolution.html">Evolution</a></li>
+             <li><a href="blog.html">blog</a></li>
+         </ul>
+         <p>&copy; 2024 THE DARK KNIGHTS IBN SINA. All rights reserved.</p>
+ 
+             
+    </footer>
+ 
 
 
 
@@ -56,16 +75,21 @@
         });
     </script>
 <style> 
-
+ #title{
+    position: sticky;
+    top: 0;
+    font-size: 40px;
+    background: white;
+ }
     #members-list{
         display: flex;
         flex-direction: column;
         align-items: start;
         justify-content: center;
-        width: 90vw;
-        border-radius: 20px;
-        border: solid 1px black;
+        width: 90vw;      
         padding: 20px;
+    
+        gap: 5px;
     }
 
     #members-list h3{
@@ -74,6 +98,8 @@
     #members-list label{
         width: 90%;
         padding: 10px;
+        border: solid 1px black;
+        border-radius: 10px;
 
         transition: .3s ;
         
@@ -112,6 +138,24 @@
         color: white;
         transition: .3s ;
     }
+    label{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .membership{
+       
+       width: 128px;
+       height: 81px;
+    }
+
+    @media screen and (max-width: 600px){
+       #title{
+        padding: 20px;
+        font-size: 25px;
+       }
+        
+    }
 </style>
 
 
@@ -119,7 +163,8 @@
 
 
 const membersListDiv = document.getElementById("members-list");
-
+const cardImg = document.getElementById("cardImg");
+const title = document.getElementById("title");
 // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCd9XbhKz-AYvVJtLCi2hVDBvyYsSGB89w",
@@ -138,30 +183,66 @@ const database = firebase.database();
 
 // Reference to the "members" database
 const memberRef = database.ref('members/');
-
 // Fetch members from Firebase
+var globalData;
 memberRef.once('value', (snapshot) => {
-    const data = snapshot.val(); 
+    const data = snapshot.val();
+    globalData = data; 
     console.log(data);
 
     // Dynamically create labels for each member
     for(const member in data) {
+        if(!member.includes("none")){
+           
         const label = document.createElement("label");
-        label.textContent = member;
+        label.textContent = transformId(member);
+        label.id = member;
         label.className = "clickable-label"; // Add a class for identification
-        
+        const img = document.createElement("img");
+        img.src = data[member].membership;
+        img.classList = "membership";
+        label.appendChild(img);
         // Add a click event listener immediately after creation
         label.addEventListener('click', () => {
-            window.location.href = "member.html?id=" + label.textContent;
+            window.location.href = "member.html?id=" + label.id;
        
             //     console.log(`Label clicked: ${label.textContent}`);
         });
 
-        membersListDiv.appendChild(label);
+
+        membersListDiv.appendChild(label); 
+        }
+        
     }
 });
 
 
+
+function transformId(id) {
+    // Step 1: Remove the leading number and hyphen
+    let parts = id.split("-").slice(1);
+
+    // Step 2: Capitalize the first letter of each part
+    let formattedStr = parts.map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(" ");
+
+    return formattedStr;
+}
+
+
+document.querySelector("body").addEventListener( "mouseover",
+    (target) => {
+        if(target.target.nodeName === "LABEL") {
+            title.textContent = `#${globalData[target.target.id].id} | ${globalData[target.target.id].name} | ${globalData[target.target.id].role}`;
+          
+        }
+        else{
+            title.textContent = `members`;
+
+        }
+    }
+)
 </script>
 </body>
 </html>

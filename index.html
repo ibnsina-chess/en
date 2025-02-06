@@ -6,6 +6,111 @@
     <title>The Dark Knights Ibn Sina - Chess Club</title>
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+    html{
+        scrollbar-width: none;
+    }
+    .main img{
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin: 20px;
+     
+    }
+    .about{
+        background: black;
+        color: white;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+    }
+    .about-p {
+        color: white;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        margin-top: 1rem;
+    }
+    
+    .activities {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 20px;
+        gap: 15px;
+    }
+    .activity-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: white;
+     
+        width: 25%;
+       height: 600px;
+       border: solid 1px black;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+      
+    }
+    .activity-card i {
+        margin-top: 10px;
+        padding: 5px;
+        font-size: 30px;
+        border-radius: 20px;
+
+    }
+    .activity-card:hover{
+        background: black;
+        color: white;
+        transition: all 0.3s ease;
+
+    }
+    .activity-card:hover img{
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    .activity-card:hover i{
+        
+        padding: 10px;
+        margin-bottom: 10px;
+        background: white;
+        color: black;
+        border-radius: 100px;
+        transition: all 0.3s ease;
+    }
+
+    .activity-card img {
+        transition: all 0.3s ease;
+  border-radius: 15px;
+        width: 250px;
+        height: 250px;
+        
+    }
+
+    .activity-card p , .activity-card h3{
+        padding: 10px;
+        font-size: 17px;
+    }
+   
+
+    @media screen and (max-width: 600px) {
+        
+        .about-p{
+            font-size: 17px;
+            height: 200px;
+            overflow-y: scroll;
+            scrollbar-width: none; 
+
+        }
+        .activity-card {
+            width: 100%;
+        }
+        
+    }
+</style>
 </head>
 <body>
     <nav>
@@ -26,11 +131,57 @@
     </nav>
 
     <div class="main">
+        <img  src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="">
         <h1 class="greeting-p">Welcome everyone to our chess club<br><span>THE DARK KNIGHTS IBN SINA</span></h1>
     </div>
+    <div class="about" >
+        <h2>About Us</h2>
+        <p class="about-p">
+            THE DARK KNIGHTS IBN SINA is the official chess club of Ibn Sina High School, dedicated to fostering a passion for chess among students. Founded in 2024 by Ahmed Elyaakoubi, who also serves as our coach, the club provides a platform for students of all skill levels to come together and improve their strategic thinking, problem-solving abilities, and overall chess skills.  the club strives to create a supportive and competitive environment, hosting regular practice sessions, tournaments, and friendly matches. Our mission is not only to excel at the game of chess but also to build a strong sense of community, discipline, and teamwork among our members. Whether you are a beginner or an advanced player, THE DARK KNIGHTS IBN SINA welcomes you to join us and be part of a growing chess family at Ibn Sina High School.
+        </p>
+    </div>
+    <h2>activities</h2>
+
+    <div class="activities">
+
+        <div class="activity-card">
+            <i class="fa-solid fa-dumbbell"></i>
+            <img src="https://i.ibb.co/Gf8dwMJ6/Chess.png" alt="">
+            <h3>Weekly Practice Sessions</h3>
+            <p>Join us every Monday and Friday for practice sessions where you can learn new strategies, improve your skills, and play friendly matches with other members.</p>
+        </div>
+        <div class="activity-card">
+            <i class="fa-solid fa-trophy"></i>
+            <img src="https://i.ibb.co/6cQ75xrR/Chess-1.png" alt="">
+            <h3>Monthly Tournaments</h3>
+            <p>Participate in our monthly tournaments to test your skills, compete against other members, and win exciting prizes.</p>
+   
+        </div>
+        <div class="activity-card">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <img src="https://i.ibb.co/TB25nKgR/Chess-2.png" alt="">
+            <h3>Chess Blog</h3>
+            <p>Stay updated with the latest news, strategies, and tips in the world of chess. Our blog features articles from experienced players, upcoming events, and insights to help you improve your game.</p>
+        </div>
+        </div>
     <footer>
-        by Abdelhakim Sahifa
-    </footer>
+       <div class="horizontal-div">
+            <img src="https://i.ibb.co/xr0mz7L/buil-by.png" alt="">
+           
+            <a href="https://github.com/abdelhakim-sahifa"> <i class="fa-brands fa-github"></i></a>
+       </div>
+
+
+          <ul class="footer-links">
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="blog.html">blog</a></li>
+        </ul>
+        <p>&copy; 2024 THE DARK KNIGHTS IBN SINA. All rights reserved.</p>
+
+            
+   </footer>
 
     <script>
         function toggleMenu() {
