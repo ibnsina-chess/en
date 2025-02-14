@@ -25,9 +25,20 @@
     
         </ul>
     </nav>
+    <button id="play">
+         <svg width="30" hight="30" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Chess.com</title><path d="M12 0a3.85 3.85 0 0 0-3.875 3.846A3.84 3.84 0 0 0 9.73 6.969l-2.79 1.85c0 .622.144 1.114.434 1.649H9.83c-.014.245-.014.549-.014.925 0 .025.003.048.006.071-.064 1.353-.507 3.472-3.62 5.842-.816.625-1.423 1.495-1.806 2.533a.33.33 0 0 0-.045.084 8.124 8.124 0 0 0-.39 2.516c0 .1.216 1.561 8.038 1.561s8.038-1.46 8.038-1.561c0-2.227-.824-4.048-2.24-5.133-4.034-3.08-3.586-5.74-3.644-6.838h2.458c.29-.535.434-1.027.434-1.649l-2.79-1.836a3.86 3.86 0 0 0 1.604-3.123A3.873 3.873 0 0 0 13.445.275c-.004-.002-.01.004-.015.004A3.76 3.76 0 0 0 12 0Z"/></svg>
+         <label id="playWithLabel">play with abdelhakim</label>
+        </button>
 
     <main>
         <img class="card" id="card" src="https://i.ibb.co/yP7ngDz/empty-membership-card.png" alt="">
+        <div class="container">
+            <h1>Chess.com Stats Viewer</h1>
+            <h1 id="usernameLbl">(username)</h1>
+            <div id="stats-container">
+                <p>Loading...</p>
+            </div>
+          </div>
     </main>
 
     <footer>
@@ -56,6 +67,40 @@
     height: 100vw;
 
 }
+
+
+#play{
+        display: none;
+        justify-content: center;
+        align-items: center;
+    padding: 22px ;
+    border: solid 1px #81B64C ;
+    color: #81B64C;
+    background-color: white;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 20px;
+    transition: all .3s ease-in-out;
+    gap: 5px;
+
+    }
+    #play:hover{
+        background-color: #81B64C;
+        color: white;
+        transition: all .3s ease-in-out;
+    }
+    svg{
+        transition: all .3s ease-in-out;
+        fill: #81B64C;
+
+    }
+#play:hover svg {
+    fill: white;
+    transition: all .3s ease-in-out;
+
+}
+
+
         .card{
             margin: 100px auto;
            filter: drop-shadow(1px 1px 20px green);
@@ -71,13 +116,80 @@
            transition: .3s ;
             
         }
+
+        .container {
+      max-width: 800px;
+      margin: 50px 0;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 10px 10px black ;
+      border: solid 1px black;
+     
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th:hover, td:hover{
+      padding: 10px;
+      text-align: left;
+      background-color: black;
+      color: white;
+    }
+    th {
+      background-color: #f8f8f8;
+    }
         @media (max-width: 768px) {
             .card{
                 max-width: 100%;
                 height: auto;
+                scale: 0.9;
+            }
+
+            .container {
+            max-width: 400px;
+            padding: 0px;
+            box-shadow: none;
+            
+            }
+
+            table {
+          width: 300px;
+
+       
+            }
+            th, td {
+                padding: 2px;
+                font-size: 16px;
+            
+            }
+            th:hover, td:hover{
+                padding: 2px;
+                font-size: 16px;
+
+           
             }
         }
-
+            #play{
+                padding: 5px;
+                font-size: 14px;
+            }
+            svg{
+                width: 20px;
+                height: 20px;
+            }
+   
     </style>
 
     
@@ -85,7 +197,9 @@
         const card = document.getElementById("card");
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-
+        const coachs = {
+            "ahmed elyaakoubi" : "elyaakoubi"
+        }
         console.log(id);
         function toggleMenu() {
             const navLinks = document.querySelector("nav ul");
@@ -109,8 +223,23 @@
 
   const memberRef = database.ref('members/' + id);
 
-  memberRef.once('value', (snapshot) => {
+  memberRef.on('value', (snapshot) => {
     const data = snapshot.val(); 
+    var username =  data.name in coachs ? coachs[data.name] : data.username
+    if(username){
+
+        const playBtn = document.getElementById('play') ; 
+        playBtn.style.display = "flex";
+        playBtn.addEventListener('click' , ()=>{window.location.href = 'https://www.chess.com/play/online/new?opponent=' + username})
+        document.getElementById('playWithLabel').innerHTML =  `Challenge ${((data.name).split(' '))[0]}(${username})`
+        if(username == '-'){
+            playBtn.style.display = "none";
+
+        }
+    }
+    document.getElementById('usernameLbl').innerHTML = `${username}`
+    fetchChessStats(username , data.name)
+
     console.log(data);
     if(data){
     card.src = data.membership
@@ -128,8 +257,80 @@
 
 })
 
-    </script>
 
+
+function displayStats(data) {
+          const container = document.getElementById("stats-container");
+          container.innerHTML = "";
+    
+          const modes = ["chess_daily", "chess_rapid", "chess_bullet", "chess_blitz"];
+          const table = document.createElement("table");
+    
+          // Create table header
+          const thead = document.createElement("thead");
+          thead.innerHTML = `
+            <tr>
+              <th>Mode</th>
+              <th>Rating</th>
+              <th>Wins</th>
+              <th>Losses</th>
+              <th>Draws</th>
+              <th>Last Updated</th>
+            </tr>
+          `;
+          table.appendChild(thead);
+    
+          // Create table body
+          const tbody = document.createElement("tbody");
+          modes.forEach(mode => {
+            if (data[mode]) {
+              const lastUpdate = new Date(data[mode].last.date * 1000).toLocaleDateString();
+              const { rating } = data[mode].last;
+              const { win, loss, draw } = data[mode].record;
+    
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td>${mode.replace("chess_", "").toUpperCase()}</td>
+                <td>${rating}</td>
+                <td>${win}</td>
+                <td>${loss}</td>
+                <td>${draw}</td>
+                <td>${lastUpdate}</td>
+              `;
+              tbody.appendChild(row);
+            }
+          });
+          table.appendChild(tbody);
+    
+          container.appendChild(table);
+        }
+    
+        // Fetch and display stats on load
+
+
+async function fetchChessStats(username , name) {
+  const  api_url = `https://api.chess.com/pub/player/${username}/stats`
+ 
+          try {
+            const response = await fetch(api_url);
+            if (!response.ok) throw new Error("Failed to fetch data");
+            const data = await response.json();
+            displayStats(data);
+          } catch (error) {
+document.getElementById("stats-container").innerHTML = `
+    <p>
+        Error: ${error.message} <br>
+        Chess.com username not found. <br>
+        ${name}, please install the Chess.com app <br> and provide your username.
+    </p>
+`;
+          }
+        }
+
+
+
+
+    </script>
 
 
 </body>
