@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dark Knights Ibn Sina - Chess Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Authentication Section */
+        #auth-section {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #qr-scanner-btn {
+            background-color: #81B64C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        #qr-scanner-btn:hover {
+            background-color: #6a9a3d;
+        }
+
+        /* Chess Game Section */
+        #game-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .board-container {
+            width: 500px;
+            max-width: 100%;
+        }
+
+        .game-info {
+            width: 300px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .game-status {
+            font-weight: bold;
+            margin: 15px 0;
+            color: #333;
+        }
+
+        .game-controls button {
+            background-color: #81B64C;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .game-controls button:hover {
+            background-color: #6a9a3d;
+        }
+
+        .move-history {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Opponent Selection */
+        #opponent-section {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #opponent-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .opponent-card {
+            width: 150px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .opponent-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-5px);
+        }
+
+        .opponent-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .opponent-name {
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .opponent-elo {
+            color: #666;
+            text-align: center;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .board-container {
+                width: 100%;
+            }
+
+            .game-info {
+                width: 100%;
+            }
+        }
+
+        /* Loader */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #81B64C;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        /* Game Results */
+        #game-results {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        #game-results h3 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .result-detail {
+            margin: 10px 0;
+        }
+
+        .elo-change {
+            font-weight: bold;
+        }
+
+        .positive-elo {
+            color: green;
+        }
+
+        .negative-elo {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="blog.html">blog</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div id="auth-section">
+            <h2>The Dark Knights Ibn Sina Chess Game</h2>
+            <p>Scan your membership QR code to login and play chess with other members.</p>
+            <button id="qr-scanner-btn"><i class="fas fa-qrcode"></i> Scan QR Code</button>
+            <div id="login-status"></div>
+        </div>
+
+        <div id="opponent-section">
+            <h2>Select an Opponent</h2>
+            <p>Choose a member to play against:</p>
+            <div id="opponent-list">
+                <!-- Opponents will be populated here -->
+                <div class="loader" id="opponent-loader"></div>
+            </div>
+        </div>
+
+        <div id="game-section">
+            <h2>Chess Game</h2>
+            <div class="game-container">
+                <div class="board-container">
+                    <div id="board"></div>
+                </div>
+                <div class="game-info">
+                    <div class="player-info" id="opponent-info">
+                        <img class="player-avatar" id="opponent-avatar" src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="Opponent">
+                        <div>
+                            <div id="opponent-name">Opponent</div>
+                            <div id="opponent-elo">ELO: ----</div>
+                        </div>
+                    </div>
+                    <div class="player-info" id="player-info">
+                        <img class="player-avatar" id="player-avatar" src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="You">
+                        <div>
+                            <div id="player-name">You</div>
+                            <div id="player-elo">ELO: ----</div>
+                        </div>
+                    </div>
+                    <div class="game-status" id="status">Waiting for game to start...</div>
+                    <div class="game-controls">
+                        <button id="start-btn">Start Game</button>
+                        <button id="resign-btn">Resign</button>
+                        <button id="new-opponent-btn">New Opponent</button>
+                    </div>
+                    <div class="move-history">
+                        <h4>Move History</h4>
+                        <div id="move-history"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-results">
+            <h3>Game Results</h3>
+            <div id="result-details"></div>
+            <button id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+
+    <!-- QR Scanner Modal -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Scan QR Code</h3>
+            <p>Please enter the URL from your membership card QR code:</p>
+            <input type="text" id="qr-input" placeholder="https://ibnsina-chess.github.io/en/member.html?id=XXXX-XXXX-XXXX">
+            <button id="submit-qr">Submit</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="horizontal-div">
+            <img src="https://i.ibb.co/xr0mz7L/buil-by.png" alt="">
+            <a href="https://github.com/abdelhakim-sahifa"> <i class="fa-brands fa-github"></i></a>
+        </div>
+        <ul class="footer-links">
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="blog.html">blog</a></li>
+        </ul>
+        <p>&copy; 2024 THE DARK KNIGHTS IBN SINA. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCd9XbhKz-AYvVJtLCi2hVDBvyYsSGB89w",
+            authDomain: "chess-3596b.firebaseapp.com",
+            databaseURL: "https://chess-3596b-default-rtdb.firebaseio.com",
+            projectId: "chess-3596b",
+            storageBucket: "chess-3596b.firebasestorage.app",
+            messagingSenderId: "628293480183",
+            appId: "1:628293480183:web:ecd5f317c728cd1233edf2",
+            measurementId: "G-11H7GE4LT7"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // Global variables
+        let currentUser = null;
+        let currentUserId = null;
+        let currentUserName = null;
+        let currentUserElo = 1200; // Default ELO
+        let selectedOpponent = null;
+        let selectedOpponentElo = 1200;
+        let board = null;
+        let game = null;
+        let gameId = null;
+
+        // DOM Elements
+        const qrScannerBtn = document.getElementById('qr-scanner-btn');
+        const qrModal = document.getElementById('qr-modal');
+        const closeModal = document.querySelector('.close');
+        const submitQrBtn = document.getElementById('submit-qr');
+        const qrInput = document.getElementById('qr-input');
+        const loginStatus = document.getElementById('login-status');
+        const opponentSection = document.getElementById('opponent-section');
+        const opponentList = document.getElementById('opponent-list');
+        const opponentLoader = document.getElementById('opponent-loader');
+        const gameSection = document.getElementById('game-section');
+        const statusElement = document.getElementById('status');
+        const moveHistoryElement = document.getElementById('move-history');
+        const startBtn = document.getElementById('start-btn');
+        const resignBtn = document.getElementById('resign-btn');
+        const newOpponentBtn = document.getElementById('new-opponent-btn');
+        const gameResultsElement = document.getElementById('game-results');
+        const resultDetailsElement = document.getElementById('result-details');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const opponentNameElement = document.getElementById('opponent-name');
+        const opponentEloElement = document.getElementById('opponent-elo');
+        const playerNameElement = document.getElementById('player-name');
+        const playerEloElement = document.getElementById('player-elo');
+        const opponentAvatarElement = document.getElementById('opponent-avatar');
+        const playerAvatarElement = document.getElementById('player-avatar');
+
+        // QR Scanner functionality
+        qrScannerBtn.addEventListener('click', () => {
+            qrModal.style.display = 'block';
+        });
+
+        closeModal.addEventListener('click', () => {
+            qrModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === qrModal) {
+                qrModal.style.display = 'none';
+            }
+        });
+
+        submitQrBtn.addEventListener('click', processQrCode);
+
+        // Process QR code and authenticate
+        function processQrCode() {
+            const qrUrl = qrInput.value.trim();
+            
+            // Validate URL format
+            if (!qrUrl.includes('member.html?id=')) {
+                loginStatus.innerHTML = '<p style="color: red;">Invalid QR code URL. Please try again.</p>';
+                return;
+            }
+
+            // Extract member ID from URL
+            const memberIdMatch = qrUrl.match(/id=([^&]*)/);
+            if (!memberIdMatch) {
+                loginStatus.innerHTML = '<p style="color: red;">Could not extract ID from URL. Please try again.</p>';
+                return;
+            }
+
+            const memberId = memberIdMatch[1];
+            currentUserId = memberId;
+
+            // Get member information from Firebase
+            database.ref('members/' + memberId).once('value')
+                .then((snapshot) => {
+                    const memberData = snapshot.val();
+                    if (!memberData) {
+                        loginStatus.innerHTML = '<p style="color: red;">Member not found. Please check your QR code.</p>';
+                        return;
+                    }
+
+                    // Extract name for email creation
+                    const nameParts = memberId.split('-');
+                    // Remove the first part (ID number)
+                    const nameForEmail = nameParts.slice(1).join('-');
+                    const email = `${nameForEmail}@ibnsinachess.com`;
+                    const password = memberId; // Using ID as password
+
+                    // Check if user exists in Firebase Auth
+                    auth.fetchSignInMethodsForEmail(email)
+                        .then((signInMethods) => {
+                            if (signInMethods.length === 0) {
+                                // User doesn't exist, create new account
+                                createNewUser(email, password, memberData);
+                            } else {
+                                // User exists, sign in
+                                signInUser(email, password, memberData);
+                            }
+                        })
+                        .catch((error) => {
+                            loginStatus.innerHTML = `<p style="color: red;">Authentication error: ${error.message}</p>`;
+                        });
+                })
+                .catch((error) => {
+                    loginStatus.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                });
+
+            // Close the modal
+            qrModal.style.display = 'none';
+        }
+
+        // Create new user in Firebase Auth
+        function createNewUser(email, password, memberData) {
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Save user to our game database
+                    const userId = userCredential.user.uid;
+                    const nameOnly = memberData.name || extractNameFromId(currentUserId);
+                    
+                    // Initialize player in games database
+                    const playerData = {
+                        name: nameOnly,
+                        email: email,
+                        memberId: currentUserId,
+                        elo: 1200,
+                        wins: 0,
+                        losses: 0,
+                        draws: 0,
+                        lastPlayed: Date.now(),
+                        avatar: memberData.membership || 'https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png'
+                    };
+
+                    database.ref('chess_players/' + userId).set(playerData)
+                        .then(() => {
+                            currentUser = userCredential.user;
+                            currentUserName = nameOnly;
+                            handleSuccessfulLogin(playerData);
+                        })
+                        .catch((error) => {
+                            loginStatus.innerHTML = `<p style="color: red;">Error saving player data: ${error.message}</p>`;
+                        });
+                })
+                .catch((error) => {
+                    loginStatus.innerHTML = `<p style="color: red;">Error creating account: ${error.message}</p>`;
+                });
+        }
+
+        // Sign in existing user
+        function signInUser(email, password, memberData) {
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    currentUser = userCredential.user;
+                    
+                    // Get player data from games database
+                    database.ref('chess_players/' + currentUser.uid).once('value')
+                        .then((snapshot) => {
+                            const playerData = snapshot.val();
+                            if (playerData) {
+                                currentUserName = playerData.name;
+                                currentUserElo = playerData.elo;
+                                handleSuccessfulLogin(playerData);
+                            } else {
+                                // Player data doesn't exist yet, initialize it
+                                const nameOnly = memberData.name || extractNameFromId(currentUserId);
+                                const newPlayerData = {
+                                    name: nameOnly,
+                                    email: email,
+                                    memberId: currentUserId,
+                                    elo: 1200,
+                                    wins: 0,
+                                    losses: 0,
+                                    draws: 0,
+                                    lastPlayed: Date.now(),
+                                    avatar: memberData.membership || 'https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png'
+                                };
+                                
+                                database.ref('chess_players/' + currentUser.uid).set(newPlayerData)
+                                    .then(() => {
+                                        currentUserName = nameOnly;
+                                        handleSuccessfulLogin(newPlayerData);
+                                    });
+                            }
+                        });
+                })
+                .catch((error) => {
+                    loginStatus.innerHTML = `<p style="color: red;">Sign in error: ${error.message}</p>`;
+                });
+        }
+
+        // After successful login
+        function handleSuccessfulLogin(playerData) {
+            loginStatus.innerHTML = `<p style="color: green;">Welcome, ${playerData.name}!</p>`;
+            
+            // Update player info
+            playerNameElement.textContent = playerData.name;
+            playerEloElement.textContent = `ELO: ${playerData.elo}`;
+            currentUserElo = playerData.elo;
+            
+            if (playerData.avatar) {
+                playerAvatarElement.src = playerData.avatar;
+            }
+
+            // Hide auth section and show opponent selection
+            document.getElementById('auth-section').style.display = 'none';
+            opponentSection.style.display = 'block';
+            
+            // Load available opponents
+            loadOpponents();
+        }
+
+        // Extract name from ID
+        function extractNameFromId(id) {
+            const parts = id.split('-');
+            // Remove the first part (number) and capitalize the rest
+            return parts.slice(1).map(part => 
+                part.charAt(0).toUpperCase() + part.slice(1)
+            ).join(' ');
+        }
+
+        // Load available opponents
+        function loadOpponents() {
+            opponentList.innerHTML = '';
+            opponentLoader.style.display = 'block';
+            
+            database.ref('chess_players').once('value')
+                .then((snapshot) => {
+                    const players = snapshot.val();
+                    opponentLoader.style.display = 'none';
+                    
+                    if (!players) {
+                        opponentList.innerHTML = '<p>No other players available.</p>';
+                        return;
+                    }
+                    
+                    // Create opponent cards
+                    Object.entries(players).forEach(([playerId, playerData]) => {
+                        // Don't include current user
+                        if (playerId === currentUser.uid) return;
+                        
+                        const opponentCard = document.createElement('div');
+                        opponentCard.className = 'opponent-card';
+                        opponentCard.dataset.id = playerId;
+                        opponentCard.dataset.name = playerData.name;
+                        opponentCard.dataset.elo = playerData.elo;
+                        
+                        const avatar = document.createElement('img');
+                        avatar.className = 'opponent-avatar';
+                        avatar.src = playerData.avatar || 'https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png';
+                        avatar.alt = playerData.name;
+                        
+                        const nameElement = document.createElement('div');
+                        nameElement.className = 'opponent-name';
+                        nameElement.textContent = playerData.name;
+                        
+                        const eloElement = document.createElement('div');
+                        eloElement.className = 'opponent-elo';
+                        eloElement.textContent = `ELO: ${playerData.elo}`;
+                        
+                        opponentCard.appendChild(avatar);
+                        opponentCard.appendChild(nameElement);
+                        opponentCard.appendChild(eloElement);
+                        
+                        opponentCard.addEventListener('click', () => selectOpponent(playerId, playerData));
+                        
+                        opponentList.appendChild(opponentCard);
+                    });
+                    
+                    if (opponentList.children.length === 0) {
+                        opponentList.innerHTML = '<p>No other players available.</p>';
+                    }
+                })
+                .catch((error) => {
+                    opponentLoader.style.display = 'none';
+                    opponentList.innerHTML = `<p>Error loading opponents: ${error.message}</p>`;
+                });
+        }
+
+        // Select an opponent
+        function selectOpponent(opponentId, opponentData) {
+            selectedOpponent = opponentId;
+            selectedOpponentElo = opponentData.elo;
+            
+            // Update opponent info in game UI
+            opponentNameElement.textContent = opponentData.name;
+            opponentEloElement.textContent = `ELO: ${opponentData.elo}`;
+            
+            if (opponentData.avatar) {
+                opponentAvatarElement.src = opponentData.avatar;
+            }
+            
+            // Hide opponent section and show game section
+            opponentSection.style.display = 'none';
+            gameSection.style.display = 'block';
+            
+            // Initialize the chess board
+            initGame();
+        }
+
+        // Initialize chess game
+        function initGame() {
+            game = new Chess();
+            
+            const config = {
+                draggable: true,
+                position: 'start',
+                onDragStart: onDragStart,
+                onDrop: onDrop,
+                onSnapEnd: onSnapEnd
+            };
+            
+            board = Chessboard('board', config);
+            updateStatus();
+            
+            // Disable buttons until game starts
+            startBtn.disabled = false;
+            resignBtn.disabled = true;
+            
+            // Add event listeners for game controls
+            startBtn.addEventListener('click', startGame);
+            resignBtn.addEventListener('click', resignGame);
+            newOpponentBtn.addEventListener('click', selectNewOpponent);
+            playAgainBtn.addEventListener('click', playAgain);
+        }
+
+        // Start a new game
+        function startGame() {
+            // Create a new game in Firebase
+            gameId = database.ref('chess_games').push().key;
+            
+            const gameData = {
+                white: currentUser.uid,
+                white_name: currentUserName,
+                white_elo: currentUserElo,
+                black: selectedOpponent,
+                black_name: opponentNameElement.textContent,
+                black_elo: selectedOpponentElo,
+                pgn: game.pgn(),
+                status: 'active',
+                created_at: Date.now(),
+                last_move_at: Date.now(),
+                moves: []
+            };
+            
+            database.ref('chess_games/' + gameId).set(gameData)
+                .then(() => {
+                    statusElement.textContent = "Game started! You're playing as White";
+                    startBtn.disabled = true;
+                    resignBtn.disabled = false;
+                })
+                .catch((error) => {
+                    statusElement.textContent = `Error starting game: ${error.message}`;
+                });
+        }
+
+        // Resign current game
+        function resignGame() {
+            if (!gameId) return;
+            
+            // Update game status in Firebase
+            database.ref('chess_games/' + gameId).update({
+                status: 'ended',
+                result: 'resignation',
+                winner: selectedOpponent,
+                ended_at: Date.now()
+            })
+            .then(() => {
+                updateEloAfterGame('loss');
+                displayGameResults('loss', 'resignation');
+            });
+        }
+
+        // Select a new opponent
+        function selectNewOpponent() {
+            gameSection.style.display = 'none';
+            gameResultsElement.style.display = 'none';
+            opponentSection.style.display = 'block';
+            
+            // Reset game state
+            if (board) board.position('start');
+            game = new Chess();
+            gameId = null;
+            selectedOpponent = null;
+            
+            // Reload opponents
+            loadOpponents();
+        }
+
+        // Play again with same opponent
+        function playAgain() {
+            gameResultsElement.style.display = 'none';
+            
+            // Reset game state
+            if (board) board.position('start');
+            game = new Chess();
+            gameId = null;
+            
+            // Show game section
+            gameSection.style.display = 'block';
+            
+            // Enable start button
+            startBtn.disabled = false;
+            resignBtn.disabled = true;
+            
+            // Clear move history
+            moveHistoryElement.innerHTML = '';
+            statusElement.textContent = "Ready to start a new game";
+        }
+
+        // Chess game move validation
+        function onDragStart(source, piece) {
+            // Do not pick up pieces if game is over or not started
+            if (game.game_over() || !gameId || startBtn.disabled === false) return false;
+            
+            // Only allow white pieces to move (player is always white)
+            if (piece.search(/^b/) !== -1) return false;
+        }
+
+        // Handle piece drop
+        function onDrop(source, target) {
+            // See if the move is legal
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Always promote to queen for simplicity
+            });
+            
+            // Illegal move
+            if (move === null) return 'snapback';
+            
+            // Save move to Firebase
+            if (gameId) {
+                const moveData = {
+                    from: source,
+                    to: target,
+                    piece: move.piece,
+                    timestamp: Date.now()
+                };
+                
+                database.ref('chess_games/' + gameId + '/moves').push(moveData);
+                database.ref('chess_games/' + gameId).update({
+                    pgn: game.pgn(),
+                    last_move_at: Date.now()
+                });
+            }
+            
+            updateStatus();
+            
+            // If game is over, update the result and ELO ratings
+            if (game.game_over()) {
+                let result;
+                
+                if (game.in_checkmate()) {
+                    result = 'checkmate';
+                } else if (game.in_draw()) {
+                    result = 'draw';
+                } else if (game.in_stalemate()) {
+                    result = 'stalemate';
+                } else if (game.in_threefold_repetition()) {
+                    result = 'threefold repetition';
+                } else if (game.insufficient_material()) {
+                    result = 'insufficient material';
+                }
+                
+                const winner = (result === 'checkmate') ? currentUser.uid : null;
+                
+                database.ref('chess_games/' + gameId).update({
+                    status: 'ended',
+                    result: result,
+                    winner: winner,
+                    ended_at: Date.now()
+                })
+                .then(() => {
+                    if (result === 'checkmate') {
+                        updateEloAfterGame('win');
+                        displayGameResults('win', result);
+                    } else if (result === 'draw' || result === 'stalemate' || 
+                               result === 'threefold repetition' || result === 'insufficient material') {
+                        updateEloAfterGame('draw');
+                        displayGameResults('draw', result);
+                    }
+                });
+            }
+            
+            // Make a simple AI move for the opponent (black)
+            setTimeout(makeRandomMove, 250);
+        }
+
+        // Update board position after piece snap animation
+        function onSnapEnd() {
+            board.position(game.fen());
+        }
+
+        // Make a random legal move for black (simulating opponent)
+        function makeRandomMove() {
+            if (game.game_over() || !gameId) return;
+            
+            const possibleMoves = game.moves();
+            // If no moves available, game is over
+            if (possibleMoves.length === 0) return;
+            
+            // Select a random move
+            const randomIdx = Math.floor(Math.random() * possibleMoves.length);
+            const move = game.move(possibleMoves[randomIdx]);
+            
+            // Update board position
+            board.position(game.fen());
+            
+            // Save move to Firebase
+            if (gameId) {
+                const moveData = {
+                    move: move.san,
+                    timestamp: Date.now()
+                };
+                
+                database.ref('chess_games/' + gameId + '/moves').push(moveData);
+                database.ref('chess_games/' + gameId).update({
+                    pgn: game.pgn(),
+                    last_move_at: Date.now()
+                });
+            }
+            
+            updateStatus();
+            
+            // If game is over, update the result and ELO ratings
+            if (game.game_over()) {
+                let result;
+                
+                if (game.in_checkmate()) {
+                    result = 'checkmate';
+                } else if (game.in_draw()) {
+                    result = 'draw';
+                } else if (game.in_stalemate()) {
+                    result = 'stalemate';
+                } else if (game.in_threefold_repetition()) {
+                    result = 'threefold repetition';
+                } else if (game.insufficient_material()) {
+                    result = 'insufficient material';
+                }
+                
+                const winner = (result === 'checkmate') ? selectedOpponent : null;
+                
+                database.ref('chess_games/' + gameId).update({
+                    status: 'ended',
+                    result: result,
+                    winner: winner,
+                    ended_at: Date.now()
+                })
+                .then(() => {
+                    if (result === 'checkmate') {
+                        updateEloAfterGame('loss');
+                        displayGameResults('loss', result);
+                    } else if (result === 'draw' || result === 'stalemate' || 
+                               result === 'threefold repetition' || result === 'insufficient material') {
+                        updateEloAfterGame('draw');
+                        displayGameResults('draw', result);
+                    }
+                });
+            }
+        }
+
+        // Update the game status display
+        function updateStatus() {
+            let status = '';
+            
+            if (game.in_checkmate()) {
+                status = game.turn() === 'w' ? 'Game over, Black wins by checkmate' : 'Game over, White wins by checkmate';
+            } else if (game.in_draw()) {
+                status = 'Game over, drawn position';
+            } else if (game.in_stalemate()) {
+                status = 'Game over, drawn by stalemate';
+            } else if (game.in_threefold_repetition()) {
+                status = 'Game over, drawn by repetition';
+            } else if (game.insufficient_material()) {
+                status = 'Game over, drawn by insufficient material';
+            } else {
+                status = game.turn() === 'w' ? 'White to move' : 'Black to move';
+                
+                if (game.in_check()) {
+                    status += ', ' + (game.turn() === 'w' ? 'White' : 'Black') + ' is in check';
+                }
+            }
+            
+            statusElement.textContent = status;
+            
+            // Update move history
+            const moves = game.history({ verbose: true });
+            let moveHistory = '';
+            
+            for (let i = 0; i < moves.length; i += 2) {
+                const moveNum = Math.floor(i / 2) + 1;
+                let moveText = `${moveNum}. ${moves[i].san}`;
+                
+                if (moves[i + 1]) {
+                    moveText += ` ${moves[i + 1].san}`;
+                }
+                
+                moveHistory += moveText + '<br>';
+            }
+            
+            moveHistoryElement.innerHTML = moveHistory;
+        }
+
+        // Calculate and update ELO after game
+        function updateEloAfterGame(result) {
+            // Simple ELO calculation
+            const k = 32; // K-factor
+            const expectedScore = 1 / (1 + Math.pow(10, (selectedOpponentElo - currentUserElo) / 400));
+            let actualScore;
+            
+            if (result === 'win') {
+                actualScore = 1;
+            } else if (result === 'loss') {
+                actualScore = 0;
+            } else { // draw
+                actualScore = 0.5;
+            }
+            
+            const eloChange = Math.round(k * (actualScore - expectedScore));
+            const newElo = currentUserElo + eloChange;
+            
+            // Update player's ELO in the database
+            database.ref('chess_players/' + currentUser.uid).update({
+                elo: newElo,
+                lastPlayed: Date.now()
+            });
+            
+            // Update opponent's ELO
+            const opponentEloChange = -eloChange;
+            const newOpponentElo = selectedOpponentElo + opponentEloChange;
+            
+            database.ref('chess_players/' + selectedOpponent).update({
+                elo: newOpponentElo,
+                lastPlayed: Date.now()
+            });
+            
+            // Update stats based on result
+            if (result === 'win') {
+                database.ref('chess_players/' + currentUser.uid).child('wins').transaction(wins => (wins || 0) + 1);
+                database.ref('chess_players/' + selectedOpponent).child('losses').transaction(losses => (losses || 0) + 1);
+            } else if (result === 'loss') {
+                database.ref('chess_players/' + currentUser.uid).child('losses').transaction(losses => (losses || 0) + 1);
+                database.ref('chess_players/' + selectedOpponent).child('wins').transaction(wins => (wins || 0) + 1);
+            } else { // draw
+                database.ref('chess_players/' + currentUser.uid).child('draws').transaction(draws => (draws || 0) + 1);
+                database.ref('chess_players/' + selectedOpponent).child('draws').transaction(draws => (draws || 0) + 1);
+            }
+            
+            // Update current user's ELO locally
+            currentUserElo = newElo;
+            playerEloElement.textContent = `ELO: ${newElo}`;
+            
+            return eloChange;
+        }
+
+        // Display game results
+        function displayGameResults(result, reason) {
+            gameSection.style.display = 'none';
+            gameResultsElement.style.display = 'block';
+            
+            let resultText = '';
+            let eloChangeClass = '';
+            let eloChange = 0;
+            
+            if (result === 'win') {
+                resultText = `You won by ${reason}!`;
+                eloChange = Math.abs(currentUserElo - parseInt(playerEloElement.textContent.replace('ELO: ', '')));
+                eloChangeClass = 'positive-elo';
+            } else if (result === 'loss') {
+                resultText = `You lost by ${reason}.`;
+                eloChange = Math.abs(parseInt(playerEloElement.textContent.replace('ELO: ', '')) - currentUserElo);
+                eloChangeClass = 'negative-elo';
+            } else { // draw
+                resultText = `Game ended in a draw (${reason}).`;
+                eloChange = Math.abs(currentUserElo - parseInt(playerEloElement.textContent.replace('ELO: ', '')));
+                eloChangeClass = eloChange > 0 ? 'positive-elo' : 'negative-elo';
+            }
+            
+            resultDetailsElement.innerHTML = `
+                <p class="result-detail">${resultText}</p>
+                <p class="result-detail">
+                    Your new ELO: ${currentUserElo} 
+                    <span class="elo-change ${eloChangeClass}">(${result !== 'loss' ? '+' : '-'}${eloChange})</span>
+                </p>
+                <p class="result-detail">Opponent: ${opponentNameElement.textContent}</p>
+            `;
+        }
+
+        // Toggle menu function
+        function toggleMenu() {
+            const navLinks = document.querySelector("nav ul");
+            navLinks.classList.toggle("show");
+        }
+
+        // Check authentication state on page load
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                // Get player data
+                database.ref('chess_players/' + user.uid).once('value')
+                    .then((snapshot) => {
+                        const playerData = snapshot.val();
+                        if (playerData) {
+                            currentUserName = playerData.name;
+                            currentUserElo = playerData.elo;
+                            currentUserId = playerData.memberId;
+                            
+                            // Update UI
+                            document.getElementById('auth-section').style.display = 'none';
+                            playerNameElement.textContent = playerData.name;
+                            playerEloElement.textContent = `ELO: ${playerData.elo}`;
+                            
+                            if (playerData.avatar) {
+                                playerAvatarElement.src = playerData.avatar;
+                            }
+                            
+                            // Show opponent section
+                            opponentSection.style.display = 'block';
+                            
+                            // Load opponents
+                            loadOpponents();
+                        } else {
+                            // Something is wrong, sign out
+                            auth.signOut();
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
