@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dark Knights Ibn Sina - Puzzle Admin</title>
+    <link rel="shortcut icon" href="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <link rel="stylesheet" href="PuzzleAdmin.css">
+</head>
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="puzzles.html">Puzzles</a></li>
+            <li><a class="active" href="admin.html">Admin</a></li>
+        </ul>
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Puzzle Administration</h1>
+            <div id="user-info">Loading...</div>
+        </div>
+
+        <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="create">Create Puzzle</div>
+            <div class="admin-tab" data-tab="manage">Manage Puzzles</div>
+        </div>
+
+        <div class="tab-content active" id="create-tab">
+            <form id="puzzle-form" class="puzzle-form">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="puzzle-id">Puzzle ID:</label>
+                        <input type="text" id="puzzle-id" placeholder="e.g., puzzle_001" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="puzzle-difficulty">Difficulty:</label>
+                        <select id="puzzle-difficulty" required>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="puzzle-turn">Turn:</label>
+                        <select id="puzzle-turn" required>
+                            <option value="w">White</option>
+                            <option value="b">Black</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="puzzle-source">Source:</label>
+                        <input type="text" id="puzzle-source" placeholder="e.g., custom, lichess, tournament" value="custom">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="theme-input">Themes:</label>
+                        <div class="theme-input-container">
+                            <input type="text" id="theme-input" placeholder="e.g., checkmate, fork, pin">
+                            <button type="button" id="add-theme-btn">Add Theme</button>
+                        </div>
+                        <div class="theme-tags" id="theme-tags"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Solutions:</label>
+                        <div class="theme-input-container">
+                            <input type="text" id="solution-input" placeholder="e.g., Rb8#, Qh7+">
+                            <button type="button" id="add-solution-btn">Add Solution</button>
+                        </div>
+                        <div class="solution-list" id="solution-list"></div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Board Position</h3>
+                    <div class="board-container">
+                        <div id="board" style="width: 100%; max-width: 400px;"></div>
+                        <div class="button-group">
+                            <button type="button" id="reset-board-btn">Reset Board</button>
+                            <button type="button" id="flip-board-btn">Flip Board</button>
+                            <button type="button" id="clear-board-btn">Clear Board</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="fen-input">FEN Position:</label>
+                            <input type="text" id="fen-input" placeholder="Enter FEN notation" required>
+                        </div>
+                        <button type="button" id="load-fen-btn">Load Position from FEN</button>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="primary" id="save-puzzle-btn">Save Puzzle</button>
+                        <button type="button" id="reset-form-btn">Reset Form</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="tab-content" id="manage-tab">
+            <div class="button-group">
+                <button type="button" id="refresh-puzzles-btn"><i class="fas fa-sync-alt"></i> Refresh Puzzles</button>
+            </div>
+            
+            <table class="puzzle-list">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Difficulty</th>
+                        <th>Themes</th>
+                        <th>Turn</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="puzzles-table-body">
+                    <tr>
+                        <td colspan="5">Loading puzzles...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="confirm-modal" id="confirm-modal">
+        <div class="modal-content">
+            <h3>Confirm Delete</h3>
+            <p id="confirm-message">Are you sure you want to delete this puzzle?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" id="cancel-btn">Cancel</button>
+                <button class="modal-btn confirm-btn" id="confirm-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <footer>
+        <div class="horizontal-div">
+            <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="">
+            <a href="index.html">The Dark Knights</a>
+        </div>
+        <ul class="footer-links">
+            <li><a href="index.html">home</a></li>
+            <li><a href="members.html">members</a></li>
+            <li><a href="classification.html">Classification</a></li>
+            <li><a href="evolution.html">Evolution</a></li>
+            <li><a href="puzzles.html">Puzzles</a></li>
+        </ul>
+        <p>&copy; 2025 The Dark Knights Ibn Sina. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Firebase configuration - reusing from puzzles.js
+        const firebaseConfig = {
+            apiKey: "AIzaSyCd9XbhKz-AYvVJtLCi2hVDBvyYsSGB89w",
+            authDomain: "chess-3596b.firebaseapp.com",
+            databaseURL: "https://chess-3596b-default-rtdb.firebaseio.com",
+            projectId: "chess-3596b",
+            storageBucket: "chess-3596b.firebasestorage.app",
+            messagingSenderId: "628293480183",
+            appId: "1:628293480183:web:ecd5f317c728cd1233edf2",
+            measurementId: "G-11H7GE4LT7"
+        };
+
+        // Initialize Firebase if not already initialized
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Global variables
+        let board = null;
+        let game = new Chess();
+        let currentPuzzleId = null;
+        let isEditMode = false;
+        let boardOrientation = 'white';
+        let themes = [];
+        let solutions = [];
+
+        // DOM elements
+        const puzzleIdInput = document.getElementById('puzzle-id');
+        const puzzleDifficultySelect = document.getElementById('puzzle-difficulty');
+        const puzzleTurnSelect = document.getElementById('puzzle-turn');
+        const puzzleSourceInput = document.getElementById('puzzle-source');
+        const themeInput = document.getElementById('theme-input');
+        const themeTagsContainer = document.getElementById('theme-tags');
+        const solutionInput = document.getElementById('solution-input');
+        const solutionListContainer = document.getElementById('solution-list');
+        const fenInput = document.getElementById('fen-input');
+        const puzzleForm = document.getElementById('puzzle-form');
+        const puzzlesTableBody = document.getElementById('puzzles-table-body');
+        const userInfoElement = document.getElementById('user-info');
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmMessage = document.getElementById('confirm-message');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const notificationElement = document.getElementById('notification');
+
+        // Auth state change
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Check if user is admin
+                database.ref('admins').once('value')
+                    .then((snapshot) => {
+                        const admins = snapshot.val() || {};
+                        console.log(admins)
+                        console.log(user.email)
+                        console.log(user.email.replace('.', '_'))
+                        console.log(admins[user.email.replace('.', '_')])
+
+                        console.log(admins[user.email.replace('.', '_')])
+                        if (user.email && admins[user.email.replace('.', '_')]) {
+                            // User is admin
+                            userInfoElement.textContent = `Admin: ${user.email}`;
+                            initializeAdmin();
+                        } else {
+                            // Not admin
+                            userInfoElement.textContent = `Access denied. You are not an admin.`;
+                            setTimeout(() => {
+                                console.log("redircting to puzzles.html");
+                                //window.location.href = "puzzles.html";
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error checking admin status:", error);
+                        showNotification("Error checking admin status", "error");
+                    });
+            } else {
+                // User not logged in
+                window.location.href = "auth.html";
+            }
+        });
+
+        // Initialize admin functionality
+        function initializeAdmin() {
+            // Initialize chessboard
+            const config = {
+                draggable: true,
+                position: 'start',
+                onDragStart: onDragStart,
+                onDrop: onDrop,
+                onSnapEnd: onSnapEnd
+            };
+            board = Chessboard('board', config);
+            
+            // Load puzzles
+            loadPuzzles();
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    if (tabId === 'manage') {
+                        loadPuzzles();
+                    }
+                });
+            });
+            
+            // Board control buttons
+            document.getElementById('reset-board-btn').addEventListener('click', () => {
+                game = new Chess();
+                board.position(game.fen());
+                fenInput.value = game.fen();
+            });
+            
+            document.getElementById('flip-board-btn').addEventListener('click', () => {
+                boardOrientation = boardOrientation === 'white' ? 'black' : 'white';
+                board.orientation(boardOrientation);
+            });
+            
+            document.getElementById('clear-board-btn').addEventListener('click', () => {
+                game = new Chess('8/8/8/8/8/8/8/8 w - - 0 1');
+                board.position(game.fen());
+                fenInput.value = game.fen();
+            });
+            
+            document.getElementById('load-fen-btn').addEventListener('click', () => {
+                const fen = fenInput.value.trim();
+                if (fen) {
+                    try {
+                        game = new Chess(fen);
+                        board.position(game.fen());
+                        // Set turn select based on FEN
+                        puzzleTurnSelect.value = game.turn();
+                    } catch (error) {
+                        showNotification("Invalid FEN notation", "error");
+                    }
+                }
+            });
+            
+            // Theme button
+            document.getElementById('add-theme-btn').addEventListener('click', addTheme);
+            
+            // Solution button
+            document.getElementById('add-solution-btn').addEventListener('click', addSolution);
+            
+            // Form submission
+            puzzleForm.addEventListener('submit', handleFormSubmit);
+            
+            // Form reset
+            document.getElementById('reset-form-btn').addEventListener('click', resetForm);
+            
+            // Refresh puzzles button
+            document.getElementById('refresh-puzzles-btn').addEventListener('click', loadPuzzles);
+            
+            // Modal buttons
+            cancelBtn.addEventListener('click', () => {
+                confirmModal.style.display = 'none';
+            });
+            
+            // FEN input change
+            const fen = fenInput.value.trim();
+                if (fen) {
+                    try {
+                        game = new Chess(fen);
+                        board.position(game.fen());
+                        // Set turn select based on FEN
+                        puzzleTurnSelect.value = game.turn();
+                    } catch (error) {
+                        showNotification("Invalid FEN notation", "error");
+                    }
+                }
+            }
+        
+        // Load puzzles from database
+        function loadPuzzles() {
+            database.ref('puzzles').once('value')
+                .then((snapshot) => {
+                    puzzlesTableBody.innerHTML = '';
+                    
+                    if (snapshot.exists()) {
+                        const puzzlesData = snapshot.val();
+                        
+                        // Sort puzzles by ID
+                        const puzzleIds = Object.keys(puzzlesData).sort();
+                        
+                        if (puzzleIds.length === 0) {
+                            puzzlesTableBody.innerHTML = '<tr><td colspan="5">No puzzles found</td></tr>';
+                            return;
+                        }
+                        
+                        puzzleIds.forEach(key => {
+                            const puzzle = puzzlesData[key];
+                            const row = document.createElement('tr');
+                            
+                            // Create table cells
+                            const idCell = document.createElement('td');
+                            idCell.textContent = puzzle.id;
+                            
+                            const difficultyCell = document.createElement('td');
+                            difficultyCell.textContent = puzzle.difficulty.charAt(0).toUpperCase() + puzzle.difficulty.slice(1);
+                            
+                            const themesCell = document.createElement('td');
+                            themesCell.textContent = puzzle.themes.join(', ');
+                            
+                            const turnCell = document.createElement('td');
+                            turnCell.textContent = puzzle.turn === 'w' ? 'White' : 'Black';
+                            
+                            const actionsCell = document.createElement('td');
+                            actionsCell.className = 'action-buttons';
+                            
+                            // Create edit button
+                            const editBtn = document.createElement('button');
+                            editBtn.className = 'action-btn edit-btn';
+                            editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                            editBtn.addEventListener('click', () => editPuzzle(puzzle));
+                            
+                            // Create delete button
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.className = 'action-btn delete-btn';
+                            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+                            deleteBtn.addEventListener('click', () => confirmDelete(puzzle.id));
+                            
+                            // Append buttons to actions cell
+                            actionsCell.appendChild(editBtn);
+                            actionsCell.appendChild(deleteBtn);
+                            
+                            // Append cells to row
+                            row.appendChild(idCell);
+                            row.appendChild(difficultyCell);
+                            row.appendChild(themesCell);
+                            row.appendChild(turnCell);
+                            row.appendChild(actionsCell);
+                            
+                            // Append row to table body
+                            puzzlesTableBody.appendChild(row);
+                        });
+                    } else {
+                        puzzlesTableBody.innerHTML = '<tr><td colspan="5">No puzzles found</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading puzzles:", error);
+                    showNotification("Error loading puzzles", "error");
+                    puzzlesTableBody.innerHTML = '<tr><td colspan="5">Error loading puzzles</td></tr>';
+                });
+        }
+
+        // Handle form submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            // Validate form
+            const puzzleId = puzzleIdInput.value.trim();
+            const difficulty = puzzleDifficultySelect.value;
+            const turn = puzzleTurnSelect.value;
+            const source = puzzleSourceInput.value.trim();
+            const fen = fenInput.value.trim();
+            
+            if (!puzzleId || !difficulty || !turn || !source || !fen) {
+                showNotification("Please fill in all required fields", "error");
+                return;
+            }
+            
+            if (themes.length === 0) {
+                showNotification("Please add at least one theme", "error");
+                return;
+            }
+            
+            if (solutions.length === 0) {
+                showNotification("Please add at least one solution", "error");
+                return;
+            }
+            
+            try {
+                // Validate FEN
+                const tempGame = new Chess(fen);
+            } catch (error) {
+                showNotification("Invalid FEN notation", "error");
+                return;
+            }
+            
+            // Create puzzle object
+            const puzzle = {
+                id: puzzleId,
+                fen: fen,
+                turn: turn,
+                solution: solutions,
+                difficulty: difficulty,
+                themes: themes,
+                source: source
+            };
+            
+            // Save to database
+            database.ref(`puzzles/${puzzleId}`).set(puzzle)
+                .then(() => {
+                    showNotification("Puzzle saved successfully!", "success");
+                    if (!isEditMode) {
+                        resetForm();
+                    }
+                    loadPuzzles();
+                })
+                .catch(error => {
+                    console.error("Error saving puzzle:", error);
+                    showNotification("Error saving puzzle", "error");
+                });
+        }
+
+        // Edit puzzle
+        function editPuzzle(puzzle) {
+            // Switch to create tab
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('.admin-tab[data-tab="create"]').classList.add('active');
+            document.getElementById('create-tab').classList.add('active');
+            
+            // Populate form
+            puzzleIdInput.value = puzzle.id;
+            puzzleDifficultySelect.value = puzzle.difficulty;
+            puzzleTurnSelect.value = puzzle.turn;
+            puzzleSourceInput.value = puzzle.source || 'custom';
+            fenInput.value = puzzle.fen;
+            
+            // Load position
+            game = new Chess(puzzle.fen);
+            board.position(game.fen());
+            
+            // Set orientation based on turn
+            boardOrientation = puzzle.turn === 'w' ? 'white' : 'black';
+            board.orientation(boardOrientation);
+            
+            // Set themes
+            themes = [...puzzle.themes];
+            renderThemes();
+            
+            // Set solutions
+            solutions = [...puzzle.solution];
+            renderSolutions();
+            
+            // Set edit mode
+            isEditMode = true;
+            currentPuzzleId = puzzle.id;
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Confirm delete
+        function confirmDelete(puzzleId) {
+            confirmMessage.textContent = `Are you sure you want to delete puzzle "${puzzleId}"?`;
+            confirmModal.style.display = 'flex';
+            
+            // Set confirm button action
+            confirmBtn.onclick = () => {
+                deletePuzzle(puzzleId);
+                confirmModal.style.display = 'none';
+            };
+        }
+
+        // Delete puzzle
+        function deletePuzzle(puzzleId) {
+            database.ref(`puzzles/${puzzleId}`).remove()
+                .then(() => {
+                    showNotification("Puzzle deleted successfully!", "success");
+                    loadPuzzles();
+                })
+                .catch(error => {
+                    console.error("Error deleting puzzle:", error);
+                    showNotification("Error deleting puzzle", "error");
+                });
+        }
+
+        // Add theme
+        function addTheme() {
+            const theme = themeInput.value.trim().toLowerCase();
+            if (theme && !themes.includes(theme)) {
+                themes.push(theme);
+                themeInput.value = '';
+                renderThemes();
+            }
+        }
+
+        // Render themes
+        function renderThemes() {
+            themeTagsContainer.innerHTML = '';
+            themes.forEach(theme => {
+                const themeTag = document.createElement('div');
+                themeTag.className = 'theme-tag';
+                themeTag.innerHTML = `
+                    ${theme}
+                    <span class="remove-tag" onclick="removeTheme('${theme}')">×</span>
+                `;
+                themeTagsContainer.appendChild(themeTag);
+            });
+        }
+
+        // Remove theme
+        function removeTheme(theme) {
+            themes = themes.filter(t => t !== theme);
+            renderThemes();
+        }
+
+        // Add solution
+        function addSolution() {
+            const solution = solutionInput.value.trim();
+            if (solution && !solutions.includes(solution)) {
+                solutions.push(solution);
+                solutionInput.value = '';
+                renderSolutions();
+            }
+        }
+
+        // Render solutions
+        function renderSolutions() {
+            solutionListContainer.innerHTML = '';
+            solutions.forEach(solution => {
+                const solutionItem = document.createElement('div');
+                solutionItem.className = 'solution-item';
+                solutionItem.innerHTML = `
+                    ${solution}
+                    <button type="button" onclick="removeSolution('${solution}')">×</button>
+                `;
+                solutionListContainer.appendChild(solutionItem);
+            });
+        }
+
+        // Remove solution
+        function removeSolution(solution) {
+            solutions = solutions.filter(s => s !== solution);
+            renderSolutions();
+        }
+
+        // Reset form
+        function resetForm() {
+            puzzleForm.reset();
+            themes = [];
+            solutions = [];
+            renderThemes();
+            renderSolutions();
+            game = new Chess();
+            board.position(game.fen());
+            fenInput.value = game.fen();
+            isEditMode = false;
+            currentPuzzleId = null;
+        }
+
+        // Chess board functions
+        function onDragStart(source, piece, position, orientation) {
+            // Allow moving any piece for setting up positions
+            return true;
+        }
+
+        function onDrop(source, target, piece, newPos, oldPos, orientation) {
+            // Always allow moves for custom position setup
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // Always promote to queen for simplicity
+            });
+            
+            // Update FEN input
+            fenInput.value = game.fen();
+            
+            // If illegal move, snap back
+            if (move === null) return 'snapback';
+        }
+
+        function onSnapEnd() {
+            board.position(game.fen());
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            notificationElement.textContent = message;
+            notificationElement.className = 'notification';
+            notificationElement.classList.add(type);
+            notificationElement.classList.add('show');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                notificationElement.classList.remove('show');
+                notificationElement.classList.add('hide');
+                
+                // Remove hide class after animation
+                setTimeout(() => {
+                    notificationElement.classList.remove('hide');
+                }, 300);
+            }, 3000);
+        }
+
+        // Toggle menu for mobile
+        function toggleMenu() {
+            const navUl = document.querySelector('nav ul');
+            navUl.classList.toggle('show');
+        }
+
+        // Make functions available globally
+        window.removeTheme = removeTheme;
+        window.removeSolution = removeSolution;
+    </script>
+</body>
+</html>
