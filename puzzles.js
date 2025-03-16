@@ -216,6 +216,46 @@ function updateUserStats() {
     userPointsElement.textContent = userStats.points || 0;
 }
 
+// Function to load a new puzzle that hasn't been solved
+function loadNewPuzzle(index, attemptedPuzzles = []) {
+    const memberId = sessionStorage.getItem("memberId");
+    if (!memberId || !puzzles.length) return;
+    
+    // Check if we've tried all puzzles
+    if (attemptedPuzzles.length >= puzzles.length) {
+        console.log("All puzzles have been solved!");
+        showMessage("Congratulations! You've solved all available puzzles.", "success");
+        // Load any puzzle anyway
+        //loadPuzzle(index);
+        return Promise.resolve();
+    }
+    
+    // Add this index to attempted puzzles
+    if (!attemptedPuzzles.includes(index)) {
+        attemptedPuzzles.push(index);
+    }
+    
+    // Check if this puzzle has been solved already
+    return database.ref(`users/${memberId}/solved/${puzzles[index].id}`).once('value')
+        .then((snapshot) => {
+            // If puzzle has been solved, skip to next one
+            if (snapshot.exists()) {
+                console.log(`Puzzle ${puzzles[index].id} already solved, trying next`);
+                return loadNewPuzzle((index + 1) % puzzles.length, attemptedPuzzles);
+            } else {
+                // Load this puzzle if not solved
+                loadPuzzle(index);
+                return Promise.resolve();
+            }
+        })
+        .catch(error => {
+            console.error("Error checking solved puzzles:", error);
+            // Load anyway on error
+            loadPuzzle(index);
+            return Promise.resolve();
+        });
+}
+
 // Load puzzles from database
 function loadPuzzles() {
     console.log("Loading puzzles");
@@ -242,7 +282,7 @@ function loadPuzzles() {
                 }
                 
                 // Load the first puzzle
-                loadPuzzle(currentPuzzleIndex);
+                loadNewPuzzle(currentPuzzleIndex);
             } else {
                 console.error("No puzzles found");
                 showMessage("No puzzles available. Please try again later.", "error");
@@ -545,6 +585,32 @@ window.location.href = "auth.html";
 document.addEventListener('DOMContentLoaded', () => {
 console.log("DOM content loaded");
 
+
+
+// Handle board focus/unfocus for scrolling
+if (boardElement) {
+    // Prevent scrolling when user interacts with the board
+    boardElement.addEventListener('mouseenter', () => {
+        document.body.style.overflow = 'hidden';
+    });
+    
+    // Allow scrolling when user leaves the board
+    boardElement.addEventListener('mouseleave', () => {
+        document.body.style.overflow = 'auto';
+    });
+    
+    // Also handle touch events for mobile devices
+    boardElement.addEventListener('touchstart', () => {
+        document.body.style.overflow = 'hidden';
+    }, { passive: true });
+    
+    // Allow scrolling when touch ends
+    boardElement.addEventListener('touchend', () => {
+        document.body.style.overflow = 'auto';
+    });
+}
+
+
 // Hint button
 if (hintButton) {
     hintButton.addEventListener('click', () => {
@@ -562,7 +628,7 @@ if (solutionButton) {
 // Next button
 if (nextButton) {
     nextButton.addEventListener('click', () => {
-        loadPuzzle(currentPuzzleIndex + 1);
+        loadNewPuzzle((currentPuzzleIndex + 1) % puzzles.length);
     });
 }
 
