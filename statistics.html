@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Statistics - The Dark Knights Ibn Sina</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="https://i.ibb.co/1nxPTWV/the-dark-knights-ibns-sina-chess-club-logo-1.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+   <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+:root {
+    --primary-color: #000;
+    --secondary-color: #fff;
+    --accent-color: #f1c40f;
+    --text-color: #000;
+    --border-color: #000;
+    --hover-color: #f2f2f2;
+    --gold-color: gold;
+    --silver-color: silver;
+    --bronze-color: #cd7f32;
+    --green-color: #2ecc71;
+    --red-color: #e74c3c;
+    --neutral-color: #95a5a6;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Rubik", sans-serif;
+}
+
+body {
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    line-height: 1.6;
+    font-size: 18px;
+    padding: 20px;
+    padding-top: 80px;
+    max-width: 2000px;
+    width: 98%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Keep nav and footer from base styles untouched */
+/* Tab container and buttons */
+.tab-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tab-button:first-child {
+    border-radius: 5px 0 0 5px;
+}
+
+.tab-button:last-child {
+    border-radius: 0 5px 5px 0;
+}
+
+.tab-button.active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Table styles - simplified to match target style */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+
+th {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: var(--secondary-color);
+}
+
+tr:hover {
+    background-color: var(--hover-color);
+    cursor: pointer;
+}
+
+#tablesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-bottom: 50px;
+}
+
+/* Medal styles */
+.gold {
+    background-color: rgb(251, 249, 241);
+}
+
+.silver {
+    background-color: rgba(192, 192, 192, 0.1);
+}
+
+.bronze {
+    background-color: rgba(205, 127, 50, 0.1);
+}
+
+.F {
+    color: var(--gold-color);
+    font-size: 20px;
+}
+
+.S {
+    color: var(--silver-color);
+    font-size: 17px;
+}
+
+.T {
+    color: var(--bronze-color);
+    font-size: 16px;
+}
+
+.r {
+    color: var(--red-color);
+}
+
+.g {
+    color: var(--green-color);
+}
+
+.n {
+    color: var(--neutral-color);
+}
+
+/* Icon styles */
+.fa-caret-up {
+    color: var(--green-color);
+    margin-left: 5px;
+}
+
+.fa-caret-down {
+    color: var(--red-color);
+    margin-left: 5px;
+}
+
+/* Link styles - kept similar to target style */
+.link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--primary-color);
+    border: solid 1px var(--primary-color);
+    border-radius: 20px;
+    background-color: var(--secondary-color);
+    box-shadow: 10px 10px var(--primary-color);
+    padding: 15px;
+    margin: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.link:hover {
+    color: var(--secondary-color);
+    background-color: var(--primary-color);
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+/* Container styles */
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+/* Filters and search */
+.time-filter, .category-filter {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.time-filter select {
+    padding: 8px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.category-button {
+    padding: 8px 15px;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.category-button.active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.search-input {
+    padding: 10px 15px;
+    width: 100%;
+    max-width: 500px;
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Chart and stats containers */
+.chart-container {
+    width: 100%;
+    height: 400px;
+    margin: 30px 0;
+}
+
+.stats-summary {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card .stat-title {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.stat-card .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Tables wrapper */
+.tables-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Loading indicator */
+.loading {
+    text-align: center;
+    font-size: 18px;
+    margin: 20px 0;
+}
+
+/* Headings */
+h1, h2, h3 {
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    body {
+        width: 90%;
+        padding: 10px;
+    }
+    
+    .tab-button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .stat-card {
+        grid-column: span 2;
+    }
+    
+    table {
+        font-size: 14px;
+    }
+    
+    .link {
+        padding: 10px;
+        box-shadow: 5px 5px var(--primary-color);
+    }
+}
+
+   </style>
+</head>
+
+<body>
+    <nav>
+        <img src="https://i.ibb.co/Vwt7cPq/the-dark-knights-ibns-sina-chess-club-logo-1.png" alt="The Dark Knights Ibn Sina Logo" class="logo">
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="members.html">Members</a></li>
+            <li><a href="chess-stats.html" class="active">Chess Stats</a></li>
+            <li><a href="games.html">Games</a></li>
+            <li><a href="blog.html">Blog</a></li>
+        </ul>
+    </nav>
+
+    <h1>Chess Statistics</h1>
+    <h3 id="lastUpdate">Last updated: Loading...</h3>
+
+    <div class="tab-container">
+        <button class="tab-button active" onclick="openTab('classification')">Classification</button>
+        <button class="tab-button" onclick="openTab('evolution')">Evolution</button>
+        <button class="tab-button" onclick="openTab('performance')">Performance</button>
+    </div>
+
+    <div id="classification" class="tab-content active">
+        <div class="search-container">
+            <input type="text" class="search-input" id="classificationSearch" placeholder="Search for a player...">
+        </div>
+        
+        <div class="category-filter">
+            <button class="category-button active" data-category="all" onclick="filterCategory('all', 'classification')">All Categories</button>
+            <button class="category-button" data-category="chess_daily" onclick="filterCategory('chess_daily', 'classification')">Daily</button>
+            <button class="category-button" data-category="chess_rapid" onclick="filterCategory('chess_rapid', 'classification')">Rapid</button>
+            <button class="category-button" data-category="chess_blitz" onclick="filterCategory('chess_blitz', 'classification')">Blitz</button>
+            <button class="category-button" data-category="chess_bullet" onclick="filterCategory('chess_bullet', 'classification')">Bullet</button>
+            <button class="category-button" data-category="tactics" onclick="filterCategory('tactics', 'classification')">Tactics</button>
+        </div>
+
+        <div class="buttons-container">
+            <a href="games.html" class="link">
+                Games Played <i class="fa-solid fa-chess"></i>
+            </a>
+        </div>
+
+        <p class="loading" id="classificationLoading">Loading classification data...</p>
+        <div class="tables-wrapper">
+            <div id="classificationTablesContainer"></div>
+        </div>
+    </div>
+
+    <div id="evolution" class="tab-content">
+        <div class="search-container">
+            <input type="text" class="search-input" id="evolutionSearch" placeholder="Search for a player...">
+        </div>
+        
+        <div class="time-filter">
+            <select id="evolutionTimeframe" onchange="updateEvolutionView()">
+                <option value="lastVisit">Since Last Visit</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+        </div>
+
+        <div class="category-filter">
+            <button class="category-button active" data-category="all" onclick="filterCategory('all', 'evolution')">All Categories</button>
+            <button class="category-button" data-category="chess_daily" onclick="filterCategory('chess_daily', 'evolution')">Daily</button>
+            <button class="category-button" data-category="chess_rapid" onclick="filterCategory('chess_rapid', 'evolution')">Rapid</button>
+            <button class="category-button" data-category="chess_blitz" onclick="filterCategory('chess_blitz', 'evolution')">Blitz</button>
+            <button class="category-button" data-category="chess_bullet" onclick="filterCategory('chess_bullet', 'evolution')">Bullet</button>
+            <button class="category-button" data-category="tactics" onclick="filterCategory('tactics', 'evolution')">Tactics</button>
+        </div>
+      
+        <p class="loading" id="evolutionLoading">Loading evolution data...</p>
+        <div class="tables-wrapper">
+            <div id="evolutionTablesContainer"></div>
+        </div>
+    </div>
+
+    <div id="performance" class="tab-content">
+        <h2>Club Performance Statistics</h2>
+        
+        <div class="stats-summary">
+            <h3>Club Overview</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p class="stat-title">Total Members</p>
+                    <p class="stat-value" id="totalMembers">-</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-title">Most Active Category</p>
+                    <p class="stat-value" id="mostActiveCategory">-</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-title">Club Average Rating</p>
+                    <p class="stat-value" id="clubAverageRating">-</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-title">Highest Improvers</p>
+                    <p class="stat-value" id="highestImprovers">-</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container" id="ratingDistributionChart"></div>
+        <div class="chart-container" id="evolutionTrendChart"></div>
+    </div>
+
+    <footer>
+        <div class="horizontal-div">
+            <img src="https://i.ibb.co/xr0mz7L/buil-by.png" alt="Built by">
+            <a href="https://github.com/abdelhakim-sahifa"><i class="fa-brands fa-github"></i></a>
+        </div>
+
+        <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="members.html">Members</a></li>
+            <li><a href="chess-stats.html">Chess Stats</a></li>
+            <li><a href="games.html">Games</a></li>
+            <li><a href="blog.html">Blog</a></li>
+        </ul>
+        <p>&copy; 2024 THE DARK KNIGHTS IBN SINA. All rights reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+        import   { select, scaleBand, scaleLinear, axisBottom, axisLeft, max, min } from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCd9XbhKz-AYvVJtLCi2hVDBvyYsSGB89w",
+            authDomain: "chess-3596b.firebaseapp.com",
+            databaseURL: "https://chess-3596b-default-rtdb.firebaseio.com",
+            projectId: "chess-3596b",
+            storageBucket: "chess-3596b.appspot.com",
+            messagingSenderId: "628293480183",
+            appId: "1:628293480183:web:ecd5f317c728cd1233edf2",
+            measurementId: "G-11H7GE4LT7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const memberRef = ref(database, 'members/');
+
+        // Chess categories
+        const chessCategories = [
+            { id: "chess_daily", title: "Chess Daily Rating" },
+            { id: "chess_rapid", title: "Chess Rapid Rating" },
+            { id: "chess_bullet", title: "Chess Bullet Rating" },
+            { id: "chess_blitz", title: "Chess Blitz Rating" },
+            { id: "tactics", title: "Tactics Rating" }
+        ];
+
+        // DOM elements
+        const classificationTablesContainer = document.getElementById('classificationTablesContainer');
+        const evolutionTablesContainer = document.getElementById('evolutionTablesContainer');
+        const classificationLoading = document.getElementById('classificationLoading');
+        const evolutionLoading = document.getElementById('evolutionLoading');
+        const lastUpdateElement = document.getElementById('lastUpdate');
+
+        // Global storage for member data
+        let allMembersData = {};
+        let performanceStats = {
+            totalMembers: 0,
+            categoryParticipation: {},
+            averageRatings: {},
+            topImprovers: []
+        };
+
+        // Time-based snapshots for ratings
+        const ratingSnapshots = {
+            current: {},
+            lastVisit: JSON.parse(localStorage.getItem('playerRatings')) || {},
+            daily: JSON.parse(localStorage.getItem('dailyRatings')) || {},
+            weekly: JSON.parse(localStorage.getItem('weeklyRatings')) || {},
+            monthly: JSON.parse(localStorage.getItem('monthlyRatings')) || {}
+        };
+
+        // Check and update periodic snapshots
+        function updatePeriodicSnapshots() {
+            const now = new Date();
+            const lastDailyUpdate = localStorage.getItem('lastDailyUpdate');
+            const lastWeeklyUpdate = localStorage.getItem('lastWeeklyUpdate');
+            const lastMonthlyUpdate = localStorage.getItem('lastMonthlyUpdate');
+
+            // Daily update (every 24 hours)
+            if (!lastDailyUpdate || now - new Date(lastDailyUpdate) > 24 * 60 * 60 * 1000) {
+                localStorage.setItem('dailyRatings', JSON.stringify(ratingSnapshots.current));
+                localStorage.setItem('lastDailyUpdate', now.toISOString());
+                ratingSnapshots.daily = {...ratingSnapshots.current};
+            }
+
+            // Weekly update (every 7 days)
+            if (!lastWeeklyUpdate || now - new Date(lastWeeklyUpdate) > 7 * 24 * 60 * 60 * 1000) {
+                localStorage.setItem('weeklyRatings', JSON.stringify(ratingSnapshots.current));
+                localStorage.setItem('lastWeeklyUpdate', now.toISOString());
+                ratingSnapshots.weekly = {...ratingSnapshots.current};
+            }
+
+            // Monthly update (every 30 days)
+            if (!lastMonthlyUpdate || now - new Date(lastMonthlyUpdate) > 30 * 24 * 60 * 60 * 1000) {
+                localStorage.setItem('monthlyRatings', JSON.stringify(ratingSnapshots.current));
+                localStorage.setItem('lastMonthlyUpdate', now.toISOString());
+                ratingSnapshots.monthly = {...ratingSnapshots.current};
+            }
+        }
+
+        // Set the last update text
+        function updateLastVisitText() {
+            const now = new Date();
+            const formattedNow = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const lastVisit = localStorage.getItem('lastVisit');
+            
+            if (lastVisit) {
+                lastUpdateElement.textContent = `Last updated: ${formattedNow}`;
+            } else {
+                lastUpdateElement.textContent = `First visit: ${formattedNow}`;
+            }
+            
+            localStorage.setItem('lastVisit', formattedNow);
+        }
+
+        // Initialize tables for each category
+        function initializeTables() {
+            // Clear containers
+            classificationTablesContainer.innerHTML = '';
+            evolutionTablesContainer.innerHTML = '';
+            
+            // Create tables for each category
+            chessCategories.forEach(category => {
+                // Classification table
+                const classTable = document.createElement('table');
+                classTable.id = `classification_${category.id}Table`;
+                classTable.className = 'category-table chess_' + category.id;
+                classTable.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>${category.title}</th>
+                            <th>Movement</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                `;
+                classificationTablesContainer.appendChild(classTable);
+                
+                // Evolution table
+                const evoTable = document.createElement('table');
+                evoTable.id = `evolution_${category.id}Table`;
+                evoTable.className = 'category-table chess_' + category.id;
+                evoTable.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>${category.title}</th>
+                            <th>Evolution</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                `;
+                evolutionTablesContainer.appendChild(evoTable);
+            });
+        }
+
+        // Fetch member data from Chess.com API
+        async function fetchMemberData() {
+            const members = {};
+            const members_snapshot = await new Promise(resolve => {
+                onValue(memberRef, snapshot => resolve(snapshot.val()), { onlyOnce: true });
+            });
+            
+            const memberKeys = Object.keys(members_snapshot);
+            performanceStats.totalMembers = memberKeys.length;
+            
+            let counter = 0;
+            const categoryData = {};
+            chessCategories.forEach(category => {
+                categoryData[category.id] = [];
+            });
+            
+            // Initialize new ratings object
+            ratingSnapshots.current = {};
+
+            for (const key of memberKeys) {
+                const memberData = await new Promise(resolve => {
+                    onValue(ref(database, `members/${key}`), snapshot => resolve(snapshot.val()), { onlyOnce: true });
+                });
+                
+                counter++;
+                const progress = (counter / memberKeys.length * 100).toFixed(2);
+                classificationLoading.innerHTML = `Loading data... ${progress}%`;
+                evolutionLoading.innerHTML = `Loading data... ${progress}%`;
+                
+                const username = memberData.username;
+                members[key] = memberData;
+
+                if (username && username !== "none") {
+                    try {
+                        const response = await fetch(`https://api.chess.com/pub/player/${username}/stats`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            members[key].chessData = data;
+
+                            // Store player's rating data for each category
+                            chessCategories.forEach(category => {
+                                const categoryData = data[category.id]?.last || data[category.id]?.highest || null;
+                                if (categoryData) {
+                                    const currentRating = categoryData.rating || 0;
+                                    const playerName = memberData.name;
+
+                                    // Store current rating in snapshots
+                                    if (!ratingSnapshots.current[playerName]) ratingSnapshots.current[playerName] = {};
+                                    ratingSnapshots.current[playerName][category.id] = currentRating;
+                                    
+                                    // Track category participation for stats
+                                    if (!performanceStats.categoryParticipation[category.id]) {
+                                        performanceStats.categoryParticipation[category.id] = 0;
+                                    }
+                                    performanceStats.categoryParticipation[category.id]++;
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Failed to fetch stats for username: ${username}`, error);
+                    }
+                }
+            }
+
+            allMembersData = members;
+            updatePeriodicSnapshots();
+            localStorage.setItem('playerRatings', JSON.stringify(ratingSnapshots.current));
+            
+            return members;
+        }
+
+        // Calculate and update all tables
+        function updateTables(members) {
+            // Process classification data
+            const classificationData = {};
+            chessCategories.forEach(category => {
+                classificationData[category.id] = [];
+                
+                // Get previous rankings from localStorage
+                const previousRankings = JSON.parse(localStorage.getItem(`${category.id}_rankings`) || '[]');
+                
+                // Calculate new rankings
+                Object.values(members).forEach(member => {
+                    if (member.chessData && member.chessData[category.id]) {
+                        const categoryData = member.chessData[category.id]?.last || member.chessData[category.id]?.highest || null;
+                        if (categoryData) {
+                            classificationData[category.id].push({
+                                name: member.name,
+                                id: makeID(member.name, member.id),
+                                rating: categoryData.rating || 0
+                            });
+                        }
+                    }
+                });
+                
+                // Sort by rating (descending)
+                classificationData[category.id].sort((a, b) => b.rating - a.rating);
+                
+                // Store rankings in localStorage
+                localStorage.setItem(`${category.id}_rankings`, JSON.stringify(classificationData[category.id]));
+                
+                // Calculate average rating for this category (for stats)
+                if (classificationData[category.id].length > 0) {
+                    const sum = classificationData[category.id].reduce((acc, player) => acc + player.rating, 0);
+                    performanceStats.averageRatings[category.id] = Math.round(sum / classificationData[category.id].length);
+                }
+                
+                // Update classification table
+                updateClassificationTable(category.id, classificationData[category.id], previousRankings);
+            });
+            
+            // Update evolution tables based on selected timeframe
+            updateEvolutionView();
+            
+            // Update performance statistics
+            updatePerformanceStats();
+            
+            // Hide loading messages
+            classificationLoading.style.display = "none";
+            evolutionLoading.style.display = "none";
+        }
+
+        // Update classification table
+        function updateClassificationTable(categoryId, players, previousRankings) {
+            const tableId = `classification_${categoryId}Table`;
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            players.forEach((player, index) => {
+                const rank = index + 1;
+                const rankLabel = rank === 1 ? "1st" : rank === 2 ? "2nd" : rank === 3 ? "3rd" : `${rank}th`;
+                
+                // Find previous ranking for this player
+                const previousRank = previousRankings.findIndex(p => p.id === player.id) + 1;
+                let movement = '';
+                
+                if (previousRank > 0) {
+                    if (rank < previousRank) {
+                        movement = `<span class="up">↑${previousRank - rank}</span>`;
+                    } else if (rank > previousRank) {
+                        movement = `<span class="down">↓${rank - previousRank}</span>`;
+                    } else {
+                        movement = '<span class="same">−</span>';
+                    }
+                } else {
+                    movement = '<span class="new">NEW</span>';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rankLabel}</td>
+                    <td>${player.name}</td>
+                    <td>${player.rating}</td>
+                    <td>${movement}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update evolution tables based on timeframe selection
+        function updateEvolutionView() {
+            const timeframe = document.getElementById('evolutionTimeframe').value;
+            const comparisonData = ratingSnapshots[timeframe] || {};
+            
+            // Process evolution data for each category
+            chessCategories.forEach(category => {
+                const tableId = `evolution_${category.id}Table`;
+                const table = document.getElementById(tableId);
+                const tbody = table.querySelector('tbody');
+                tbody.innerHTML = '';
+                
+                const evolutionData = [];
+                
+                // Compare current ratings with previous snapshots
+                Object.keys(ratingSnapshots.current).forEach(playerName => {
+                    if (ratingSnapshots.current[playerName][category.id]) {
+                        const currentRating = ratingSnapshots.current[playerName][category.id] || 0;
+                        const previousRating = comparisonData[playerName]?.[category.id] || currentRating;
+                        const evolution = currentRating - previousRating;
+                        
+                        evolutionData.push({
+                            name: playerName,
+                            rating: currentRating,
+                            evolution: evolution
+                        });
+                        
+                        // Track top improvers for performance stats
+                        if (evolution > 0) {
+                            performanceStats.topImprovers.push({
+                                name: playerName,
+                                category: category.id,
+                                improvement: evolution
+                            });
+                        }
+                    }
+                });
+                
+                // Sort by evolution (descending)
+                evolutionData.sort((a, b) => b.evolution - a.evolution);
+                
+                // Update evolution table
+                evolutionData.forEach(player => {
+                    const row = document.createElement('tr');
+                    let evolutionDisplay = '';
+                    
+                    if (player.evolution > 0) {
+                        evolutionDisplay = `<span class="up">+${player.evolution}</span>`;
+                    } else if (player.evolution < 0) {
+                        evolutionDisplay = `<span class="down">${player.evolution}</span>`;
+                    } else {
+                        evolutionDisplay = '<span class="same">0</span>';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${player.name}</td>
+                        <td>${player.rating}</td>
+                        <td>${evolutionDisplay}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
+        }
+
+        // Update performance statistics section
+        function updatePerformanceStats() {
+            // Total members
+            document.getElementById('totalMembers').textContent = performanceStats.totalMembers;
+            
+            // Most active category
+            let mostActiveCategory = '';
+            let highestParticipation = 0;
+            
+            Object.entries(performanceStats.categoryParticipation).forEach(([category, count]) => {
+                if (count > highestParticipation) {
+                    highestParticipation = count;
+                    mostActiveCategory = category;
+                }
+            });
+            
+            // Format category name for display
+            const formattedCategory = mostActiveCategory
+                .replace('chess_', '')
+                .replace(/\b\w/g, char => char.toUpperCase());
+                
+            document.getElementById('mostActiveCategory').textContent = formattedCategory;
+            
+            // Club average rating
+            const avgRatings = Object.values(performanceStats.averageRatings);
+            if (avgRatings.length > 0) {
+                const totalAvg = Math.round(avgRatings.reduce((sum, rating) => sum + rating, 0) / avgRatings.length);
+                document.getElementById('clubAverageRating').textContent = totalAvg;
+            } else {
+                document.getElementById('clubAverageRating').textContent = 'N/A';
+            }
+            
+            // Top improvers
+            performanceStats.topImprovers.sort((a, b) => b.improvement - a.improvement);
+            const topImprover = performanceStats.topImprovers[0];
+            
+            if (topImprover) {
+                const category = topImprover.category.replace('chess_', '').replace(/\b\w/g, c => c.toUpperCase());
+                document.getElementById('highestImprovers').textContent = `${topImprover.name} (+${topImprover.improvement} in ${category})`;
+            } else {
+                document.getElementById('highestImprovers').textContent = 'N/A';
+            }
+            
+            // Create visualization charts
+            createRatingDistributionChart();
+            createEvolutionTrendChart();
+        }
+
+        // Create rating distribution chart
+      // Update the createRatingDistributionChart function
+function createRatingDistributionChart() {
+    const chartContainer = document.getElementById('ratingDistributionChart');
+    chartContainer.innerHTML = '<h3>Rating Distribution</h3><div id="ratingChart"></div>';
+    
+    // Prepare data for chart
+    const distributionData = {};
+    
+    // Define rating ranges
+    const ratingRanges = [
+        { min: 0, max: 800, label: '0-800' },
+        { min: 801, max: 1000, label: '801-1000' },
+        { min: 1001, max: 1200, label: '1001-1200' },
+        { min: 1201, max: 1400, label: '1201-1400' },
+        { min: 1401, max: 1600, label: '1401-1600' },
+        { min: 1601, max: 1800, label: '1601-1800' },
+        { min: 1801, max: 2000, label: '1801-2000' },
+        { min: 2001, max: 2200, label: '2001-2200' },
+        { min: 2201, max: 10000, label: '2201+' }
+    ];
+    
+    // Initialize range counts
+    ratingRanges.forEach(range => {
+        distributionData[range.label] = { count: 0 };
+    });
+    
+    // Count players in each range
+    chessCategories.forEach(category => {
+        Object.values(allMembersData).forEach(member => {
+            if (member.chessData && member.chessData[category.id]) {
+                const categoryData = member.chessData[category.id]?.last || member.chessData[category.id]?.highest || null;
+                if (categoryData) {
+                    const rating = categoryData.rating || 0;
+                    
+                    // Find applicable range
+                    ratingRanges.forEach(range => {
+                        if (rating >= range.min && rating <= range.max) {
+                            distributionData[range.label].count++;
+                        }
+                    });
+                }
+            }
+        });
+    });
+    
+    // Convert to array for D3
+    const chartData = Object.entries(distributionData).map(([label, data]) => ({
+        range: label,
+        count: data.count
+    }));
+    
+    // Create bar chart using D3
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const width = Math.min(600, window.innerWidth - 60) - margin.left - margin.right;
+    const height = 300 - margin.top - margin.bottom;
+    
+    const svg = select('#ratingChart')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+        
+    // X scale
+    const x = scaleBand()
+        .domain(chartData.map(d => d.range))
+        .range([0, width])
+        .padding(0.1);
+        
+    // Y scale
+    const y = scaleLinear()
+        .domain([0, max(chartData, d => d.count)])
+        .nice()
+        .range([height, 0]);
+        
+    // Add X axis
+    svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(axisBottom(x))
+        .selectAll('text')
+        .attr('transform', 'translate(-10,0)rotate(-45)')
+        .style('text-anchor', 'end');
+        
+    // Add Y axis
+    svg.append('g')
+        .call(axisLeft(y));
+        
+    // Add bars
+    svg.selectAll('.bar')
+        .data(chartData)
+        .enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('x', d => x(d.range))
+        .attr('y', d => y(d.count))
+        .attr('width', x.bandwidth())
+        .attr('height', d => height - y(d.count))
+        .attr('fill', '#4a90e2');
+}
+        // Create evolution trend chart
+        function createEvolutionTrendChart() {
+    const chartContainer = document.getElementById('evolutionTrendChart');
+    chartContainer.innerHTML = '<h3>Rating Evolution Trends</h3><div id="trendChart"></div>';
+    
+    // Prepare data for chart
+    const trendData = [];
+    
+    chessCategories.forEach(category => {
+        const categoryId = category.id;
+        const categoryName = categoryId.replace('chess_', '').replace(/\b\w/g, c => c.toUpperCase());
+        
+        let totalEvolution = 0;
+        let playerCount = 0;
+        
+        Object.keys(ratingSnapshots.current).forEach(playerName => {
+            if (ratingSnapshots.current[playerName][categoryId]) {
+                const currentRating = ratingSnapshots.current[playerName][categoryId] || 0;
+                const previousRating = ratingSnapshots.lastVisit[playerName]?.[categoryId] || currentRating;
+                const evolution = currentRating - previousRating;
+                
+                totalEvolution += evolution;
+                playerCount++;
+            }
+        });
+        
+        if (playerCount > 0) {
+            trendData.push({
+                category: categoryName,
+                avgEvolution: Math.round(totalEvolution / playerCount)
+            });
+        }
+    });
+    
+    // Create bar chart using D3
+    const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+    const width = Math.min(600, window.innerWidth - 60) - margin.left - margin.right;
+    const height = 300 - margin.top - margin.bottom;
+    
+    const svg = select('#trendChart')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+        
+    // X scale
+    const x = scaleBand()
+        .domain(trendData.map(d => d.category))
+        .range([0, width])
+        .padding(0.1);
+        
+    // Y scale
+    const y = scaleLinear()
+        .domain([
+            Math.min(0, min(trendData, d => d.avgEvolution)),
+            Math.max(0, max(trendData, d => d.avgEvolution))
+        ])
+        .nice()
+        .range([height, 0]);
+        
+    // Add X axis
+    svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(axisBottom(x))
+        .selectAll('text')
+        .attr('transform', 'translate(-10,0)rotate(-45)')
+        .style('text-anchor', 'end');
+        
+    // Add Y axis
+    svg.append('g')
+        .call(axisLeft(y));
+        
+    // Add bars
+    svg.selectAll('.bar')
+        .data(trendData)
+        .enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('x', d => x(d.category))
+        .attr('y', d => d.avgEvolution >= 0 ? y(d.avgEvolution) : y(0))
+        .attr('width', x.bandwidth())
+        .attr('height', d => Math.abs(y(d.avgEvolution) - y(0)))
+        .attr('fill', d => d.avgEvolution >= 0 ? '#4CAF50' : '#F44336');
+        
+    // Add zero line
+    svg.append('line')
+        .attr('x1', 0)
+        .attr('x2', width)
+        .attr('y1', y(0))
+        .attr('y2', y(0))
+        .attr('stroke', '#000')
+        .attr('stroke-width', 1);
+}
+        // Helper function to make unique ID for player
+        function makeID(name, id) {
+            return `${name}-${id}`.toLowerCase().replace(/\s+/g, '-');
+        }
+
+        // Filter table by category
+        function filterCategory(category, tabType) {
+            // Update active button
+            const buttons = document.querySelectorAll(`#${tabType} .category-button`);
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === category) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Show/hide tables
+            const tables = document.querySelectorAll(`#${tabType} .category-table`);
+            tables.forEach(table => {
+                if (category === 'all') {
+                    table.style.display = 'table';
+                } else {
+                    table.style.display = table.className.includes(category) ? 'table' : 'none';
+                }
+            });
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const classificationSearch = document.getElementById('classificationSearch');
+            const evolutionSearch = document.getElementById('evolutionSearch');
+            
+            classificationSearch.addEventListener('input', () => {
+                searchTables('classification', classificationSearch.value);
+            });
+            
+            evolutionSearch.addEventListener('input', () => {
+                searchTables('evolution', evolutionSearch.value);
+            });
+        }
+
+        // Search tables
+        function searchTables(tabType, query) {
+            const tables = document.querySelectorAll(`#${tabType} .category-table`);
+            const lowercaseQuery = query.toLowerCase();
+            
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const nameCell = row.cells[tabType === 'classification' ? 1 : 0];
+                    const name = nameCell.textContent.toLowerCase();
+                    
+                    if (name.includes(lowercaseQuery)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Toggle active tab
+        function openTab(tabName) {
+            // Update tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.textContent.toLowerCase() === tabName) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // Update tab content
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === tabName) {
+                    content.classList.add('active');
+                }
+            });
+        }
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const nav = document.querySelector('nav');
+            nav.classList.toggle('active');
+        }
+
+        // Initialize the application
+        async function initialize() {
+            initializeTables();
+            setupSearch();
+            updateLastVisitText();
+            
+            try {
+                const membersData = await fetchMemberData();
+                updateTables(membersData);
+            } catch (error) {
+                console.error('Failed to initialize:', error);
+                classificationLoading.textContent = 'Failed to load data. Please try again later.';
+                evolutionLoading.textContent = 'Failed to load data. Please try again later.';
+            }
+        }
+
+        // Run initialization
+        initialize();
+
+        // Make functions available to global scope
+        window.openTab = openTab;
+        window.filterCategory = filterCategory;
+        window.updateEvolutionView = updateEvolutionView;
+        window.toggleMenu = toggleMenu;
+    </script>
+</body>
+</html>
